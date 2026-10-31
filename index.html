@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090d18">
+<meta name="description" content="Convert images, PDFs, documents, spreadsheets, data, audio and video right in your browser. Private: files never leave your device.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c5cff' stroke-width='2'%3E%3Cpath d='M7 3h7l5 5v13H7z'/%3E%3Cpath d='M14 3v6h5M10 14h6M10 18h6'/%3E%3C/svg%3E">
+<title>Deluxe Convert — Free Online File Converter</title>
+<style>
+:root{--bg:#090d18;--panel:#111827;--line:#26344c;--text:#eef4ff;--muted:#91a2bd;--accent:#7c5cff;--cyan:#35d7e8;--good:#49d6a0;--bad:#ff8fa8}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% 0%,#20204b 0,transparent 38%),radial-gradient(ellipse at 100% 20%,#123449 0,transparent 32%),var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{max-width:1050px;margin:auto;padding:28px 20px 55px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:44px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:19px;letter-spacing:-.5px}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;box-shadow:0 8px 28px #7c5cff55}
+.logo svg{width:24px}
+.badge{color:#b9c6df;border:1px solid var(--line);padding:7px 12px;border-radius:30px;font-size:12px}
+.hero{text-align:center;margin-bottom:30px}
+.eyebrow{color:#9e8dff;font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:800}
+.hero h1{font-size:clamp(34px,6vw,56px);line-height:1.08;letter-spacing:-2px;margin:12px 0}
+.hero h1 span{background:linear-gradient(90deg,#a996ff,#56e4ee);color:transparent;background-clip:text;-webkit-background-clip:text}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto}
+.card{background:linear-gradient(145deg,#141e30ee,#0f1726f2);border:1px solid var(--line);border-radius:24px;padding:25px;box-shadow:0 24px 80px #0005}
+.drop{border:1.5px dashed #536587;border-radius:18px;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:25px;cursor:pointer;transition:.2s;background:#111b2b88}
+.drop:hover,.drop.drag,.drop:focus-visible{border-color:var(--cyan);background:#18304488;outline:none}
+.uploadicon{width:54px;height:54px;border-radius:18px;background:#27204d;display:grid;place-items:center;margin-bottom:12px;color:#b9aaff}
+.uploadicon svg{width:27px}
+.drop strong{font-size:17px}.drop small{color:var(--muted);margin-top:5px}
+.browse{color:#6ce5ed;text-decoration:underline;text-underline-offset:3px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.chip{font-size:11px;color:#b9c6df;border:1px solid var(--line);border-radius:20px;padding:3px 10px;background:#0c152599}
+#list{margin-top:18px;display:grid;gap:10px}
+.row{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;background:#0c1525;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.fileicon{width:38px;height:38px;border-radius:11px;background:#242044;display:grid;place-items:center;color:#b9aaff;font-size:11px;font-weight:800;text-transform:uppercase}
+.meta{min-width:0}
+.fname{font-weight:700;overflow-wrap:anywhere}
+.fsub{font-size:12px;color:var(--muted)}
+.fsub.ok{color:var(--good)}.fsub.err{color:var(--bad)}
+.bar{height:4px;background:#1b2a42;border-radius:4px;margin-top:7px;overflow:hidden;display:none}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .2s}
+.rctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:13px;outline:none;max-width:150px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font:700 13px inherit;cursor:pointer;transition:.2s;color:#fff;background:linear-gradient(100deg,#7557f5,#318edb);text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.12)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#202b40;color:#c6d2e6}.btn.dl{background:linear-gradient(100deg,#1f9d76,#28b7a1)}
+.x{border:0;background:transparent;color:#9aabc4;font-size:22px;cursor:pointer;line-height:1}
+.actions{display:none;gap:10px;margin-top:18px;flex-wrap:wrap}
+.actions .btn{padding:13px 18px;font-size:14px}.actions .main{flex:1;min-width:180px}
+.note{color:var(--muted);font-size:12px;text-align:center;margin:17px 0 0}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px}
+.feature{border:1px solid var(--line);border-radius:16px;padding:17px;background:#101a2a99}
+.feature b{display:block;margin:7px 0 3px}.feature p{font-size:12px;color:var(--muted);margin:0}.ficon{font-size:21px}
+.footer{text-align:center;color:#70819c;font-size:12px;margin-top:30px}
+@media(max-width:700px){
+ .wrap{padding:18px 14px 35px}.top{margin-bottom:30px}.card{padding:15px}.features{grid-template-columns:1fr}.badge{display:none}
+ .row{grid-template-columns:38px 1fr}.rctl{grid-column:1/-1;justify-content:stretch}.rctl select{flex:1;max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M10 14h6M10 18h6"/></svg></div>DELUXE CONVERT</div><div class="badge">PRIVATE · BROWSER-BASED CONVERSION</div></header>
+
+<section class="hero"><div class="eyebrow">One tool. Many formats.</div><h1>Convert files <span>effortlessly.</span></h1><p>Images, PDFs, Word, spreadsheets, data, audio and video. Convert several files at once, right in your browser.</p></section>
+
+<main class="card">
+<div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose files to convert">
+ <div class="uploadicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v4h16v-4"/></svg></div>
+ <strong>Drop your files here</strong><small>or <span class="browse">browse files</span> · select as many as you like</small>
+ <div class="chips"><span class="chip">Images</span><span class="chip">PDF</span><span class="chip">Word</span><span class="chip">Excel / CSV</span><span class="chip">JSON / YAML / XML</span><span class="chip">Text / HTML / MD</span><span class="chip">Audio</span><span class="chip">Video</span><span class="chip">Any file → ZIP</span></div>
+ <input type="file" id="file" multiple hidden>
+</div>
+
+<div id="list" aria-live="polite"></div>
+
+<div class="actions" id="actions">
+ <button class="btn main" id="convertAll">Convert all ↗</button>
+ <button class="btn ghost" id="zipAll" disabled>Download all (ZIP)</button>
+ <button class="btn ghost" id="clear">Clear</button>
+</div>
+<p class="note">Everything runs on your device. Files are never uploaded. Audio and video use a larger engine that loads the first time you need it.</p>
+</main>
+
+<section class="features">
+ <div class="feature"><div class="ficon">⚡</div><b>Batch conversion</b><p>Add many files, pick a format for each, convert them all in one go.</p></div>
+ <div class="feature"><div class="ficon">🔒</div><b>Privacy first</b><p>No uploads, no accounts. Your files stay in your browser.</p></div>
+ <div class="feature"><div class="ficon">✦</div><b>Wide format support</b><p>From PNG to PDF, XLSX to JSON, MOV to MP4 and more.</p></div>
+</section>
+<div class="footer">DELUXE CONVERT · Built for everyday file conversions</div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const ext = n => (n.split('.').pop() || '').toLowerCase();
+const baseName = n => n.replace(/\.[^.]+$/, '') || 'file';
+const fmtBytes = n => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : n < 1073741824 ? (n / 1048576).toFixed(2) + ' MB' : (n / 1073741824).toFixed(2) + ' GB';
+
+/* ---------- lazy library loader (CDN) ---------- */
+const CDN = 'https://cdn.jsdelivr.net/npm/';
+const LIBS = {
+  jszip: CDN + 'jszip@3.10.1/dist/jszip.min.js',
+  jspdf: CDN + 'jspdf@2.5.1/dist/jspdf.umd.min.js',
+  pdfjs: CDN + 'pdfjs-dist@3.11.174/build/pdf.min.js',
+  mammoth: CDN + 'mammoth@1.8.0/mammoth.browser.min.js',
+  xlsx: CDN + 'xlsx@0.18.5/dist/xlsx.full.min.js',
+  yaml: CDN + 'js-yaml@4.1.0/dist/js-yaml.min.js',
+  marked: CDN + 'marked@12.0.2/marked.min.js',
+  turndown: CDN + 'turndown@7.2.0/lib/turndown.browser.umd.js',
+  ffmpeg: 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
+  ffutil: 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js'
+};
+const PDFJS_WORKER = CDN + 'pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+const loaded = {};
+function lib(name) {
+  const src = LIBS[name];
+  return loaded[name] || (loaded[name] = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res;
+    s.onerror = () => { delete loaded[name]; rej(new Error('Could not load a required component. Check your connection and try again.')); };
+    document.head.appendChild(s);
+  }));
+}
+
+/* ---------- format registry ---------- */
+const KIND = {};
+const def = (kind, list) => list.split(' ').forEach(e => KIND[e] = kind);
+def('image', 'png jpg jpeg webp gif bmp svg avif ico');
+def('pdf', 'pdf'); def('docx', 'docx');
+def('sheet', 'xlsx xls ods'); def('table', 'csv tsv');
+def('json', 'json'); def('yaml', 'yaml yml'); def('xml', 'xml');
+def('text', 'txt md markdown html htm');
+def('audio', 'mp3 wav ogg oga m4a aac flac opus wma');
+def('video', 'mp4 webm mov mkv avi m4v flv');
+const DATA_OUT = ['json', 'csv', 'tsv', 'xlsx', 'yaml', 'xml', 'html', 'txt'];
+const OUT = {
+  image: ['png', 'jpg', 'webp', 'bmp', 'ico', 'pdf'],
+  pdf: ['png', 'jpg', 'txt'],
+  docx: ['html', 'txt', 'md', 'pdf'],
+  sheet: DATA_OUT, table: DATA_OUT, json: DATA_OUT, yaml: DATA_OUT,
+  xml: ['json', 'yaml', 'txt'],
+  text: ['txt', 'html', 'md', 'pdf'],
+  audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a'],
+  video: ['mp4', 'webm', 'gif', 'mp3', 'wav', 'm4a'],
+  other: []
+};
+const LABEL = { jpg: 'JPEG', png: 'PNG', webp: 'WebP', bmp: 'BMP', ico: 'ICO', pdf: 'PDF', txt: 'TXT', html: 'HTML', md: 'Markdown', json: 'JSON', csv: 'CSV', tsv: 'TSV', xlsx: 'Excel (XLSX)', yaml: 'YAML', xml: 'XML', mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A (AAC)', mp4: 'MP4', webm: 'WebM', gif: 'GIF', zip: 'ZIP archive' };
+const norm = e => ({ jpeg: 'jpg', yml: 'yaml', htm: 'html', markdown: 'md' }[e] || e);
+function kindOf(f) {
+  const e = ext(f.name);
+  if (KIND[e]) return KIND[e];
+  if (f.type.startsWith('image/')) return 'image';
+  if (f.type.startsWith('audio/')) return 'audio';
+  if (f.type.startsWith('video/')) return 'video';
+  return 'other';
+}
+function targetsFor(f, kind) {
+  const self = norm(ext(f.name));
+  const t = (OUT[kind] || []).filter(x => x !== self);
+  if (self !== 'zip') t.push('zip');
+  return t;
+}
+
+/* ---------- helpers ---------- */
+const textBlob = (s, mime) => new Blob([s], { type: mime + ';charset=utf-8' });
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const canvasBlob = (c, mime, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Your browser cannot create this image format.')), mime, q));
+const bytesOf = async blob => new Uint8Array(await blob.arrayBuffer());
+
+/* ---------- images ---------- */
+async function loadImage(f) {
+  const url = URL.createObjectURL(f);
+  try {
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('This image could not be read by your browser.')); img.src = url; });
+    const w = img.naturalWidth || 1024, h = img.naturalHeight || 1024;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    return { img, w, h, c, ctx: c.getContext('2d') };
+  } finally { setTimeout(() => URL.revokeObjectURL(url), 5000); }
+}
+function encodeBMP(c) {
+  const w = c.width, h = c.height, d = c.getContext('2d').getImageData(0, 0, w, h).data;
+  const row = Math.ceil(w * 3 / 4) * 4, size = 54 + row * h, buf = new ArrayBuffer(size), v = new DataView(buf);
+  v.setUint16(0, 0x4D42, true); v.setUint32(2, size, true); v.setUint32(10, 54, true);
+  v.setUint32(14, 40, true); v.setInt32(18, w, true); v.setInt32(22, h, true); v.setUint16(26, 1, true); v.setUint16(28, 24, true); v.setUint32(34, row * h, true);
+  const u = new Uint8Array(buf);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const s = (y * w + x) * 4, o = 54 + (h - 1 - y) * row + x * 3;
+    u[o] = d[s + 2]; u[o + 1] = d[s + 1]; u[o + 2] = d[s];
+  }
+  return new Blob([buf], { type: 'image/bmp' });
+}
+async function encodeICO(src) {
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+  const k = Math.min(S / src.w, S / src.h), w = src.w * k, h = src.h * k;
+  c.getContext('2d').drawImage(src.img, (S - w) / 2, (S - h) / 2, w, h);
+  const png = await bytesOf(await canvasBlob(c, 'image/png'));
+  const head = new DataView(new ArrayBuffer(22));
+  head.setUint16(2, 1, true); head.setUint16(4, 1, true);
+  head.setUint8(6, 0); head.setUint8(7, 0); head.setUint16(10, 1, true); head.setUint16(12, 32, true);
+  head.setUint32(14, png.length, true); head.setUint32(18, 22, true);
+  return new Blob([head.buffer, png], { type: 'image/x-icon' });
+}
+async function imageTo(f, target) {
+  const src = await loadImage(f);
+  const opaque = ['jpg', 'bmp', 'pdf'].includes(target);
+  if (opaque) { src.ctx.fillStyle = '#fff'; src.ctx.fillRect(0, 0, src.w, src.h); }
+  src.ctx.drawImage(src.img, 0, 0, src.w, src.h);
+  if (target === 'png') return canvasBlob(src.c, 'image/png');
+  if (target === 'jpg') return canvasBlob(src.c, 'image/jpeg', .92);
+  if (target === 'webp') return canvasBlob(src.c, 'image/webp', .92);
+  if (target === 'bmp') return encodeBMP(src.c);
+  if (target === 'ico') return encodeICO(src);
+  if (target === 'pdf') {
+    await lib('jspdf');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: src.w > src.h ? 'l' : 'p', unit: 'px', format: [src.w, src.h], hotfixes: ['px_scaling'] });
+    pdf.addImage(src.c.toDataURL('image/jpeg', .92), 'JPEG', 0, 0, src.w, src.h);
+    return pdf.output('blob');
+  }
+  throw new Error('Unsupported target.');
+}
+
+/* ---------- PDF ---------- */
+async function pdfTo(f, target, prog) {
+  await lib('pdfjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+  const doc = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+  if (target === 'txt') {
+    let out = '';
+    for (let i = 1; i <= doc.numPages; i++) {
+      const tc = await (await doc.getPage(i)).getTextContent();
+      out += tc.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('') + '\n\n';
+      prog(i / doc.numPages);
+    }
+    return { blob: textBlob(out.trim(), 'text/plain'), name: baseName(f.name) + '.txt' };
+  }
+  const mime = target === 'jpg' ? 'image/jpeg' : 'image/png', files = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i), vp = page.getViewport({ scale: 2 });
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    const ctx = c.getContext('2d');
+    if (target === 'jpg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    files.push(await canvasBlob(c, mime, .92));
+    prog(i / doc.numPages);
+  }
+  if (files.length === 1) return { blob: files[0], name: baseName(f.name) + '.' + target };
+  await lib('jszip');
+  const zip = new JSZip();
+  files.forEach((b, i) => zip.file(`${baseName(f.name)}-page-${String(i + 1).padStart(3, '0')}.${target}`, b));
+  return { blob: await zip.generateAsync({ type: 'blob' }), name: baseName(f.name) + '-pages.zip' };
+}
+async function textToPdf(text) {
+  await lib('jspdf');
+  const { jsPDF } = window.jspdf, pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+  const m = 48, W = pdf.internal.pageSize.getWidth() - m * 2, H = pdf.internal.pageSize.getHeight() - m;
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(11);
+  let y = m;
+  for (const line of pdf.splitTextToSize(text.replace(/\t/g, '    '), W)) {
+    if (y > H) { pdf.addPage(); y = m; }
+    pdf.text(line, m, y); y += 15;
+  }
+  return pdf.output('blob');
+}
+
+/* ---------- documents & text ---------- */
+async function docxTo(f, target) {
+  await lib('mammoth');
+  const ab = await f.arrayBuffer();
+  if (target === 'html') {
+    const r = await mammoth.convertToHtml({ arrayBuffer: ab });
+    return textBlob('<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(baseName(f.name)) + '</title></head><body>' + r.value + '</body></html>', 'text/html');
+  }
+  if (target === 'md') { await lib('turndown'); const r = await mammoth.convertToHtml({ arrayBuffer: ab }); return textBlob(new TurndownService({ headingStyle: 'atx' }).turndown(r.value), 'text/markdown'); }
+  const raw = (await mammoth.extractRawText({ arrayBuffer: ab })).value;
+  return target === 'pdf' ? textToPdf(raw) : textBlob(raw, 'text/plain');
+}
+const htmlToText = h => { const d = new DOMParser().parseFromString(h, 'text/html'); d.querySelectorAll('script,style').forEach(n => n.remove()); return (d.body.textContent || '').replace(/\n{3,}/g, '\n\n').trim(); };
+async function textTo(f, target) {
+  const src = norm(ext(f.name)), s = await f.text();
+  if (target === 'txt') return textBlob(src === 'html' ? htmlToText(s) : s, 'text/plain');
+  if (target === 'pdf') return textToPdf(src === 'html' ? htmlToText(s) : s);
+  if (target === 'html') {
+    let body;
+    if (src === 'md') { await lib('marked'); body = marked.parse(s); } else body = '<pre>' + escapeHtml(s) + '</pre>';
+    return textBlob('<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(baseName(f.name)) + '</title></head><body>' + body + '</body></html>', 'text/html');
+  }
+  if (target === 'md') { if (src === 'html') { await lib('turndown'); return textBlob(new TurndownService({ headingStyle: 'atx' }).turndown(s), 'text/markdown'); } return textBlob(s, 'text/markdown'); }
+  throw new Error('Unsupported target.');
+}
+
+/* ---------- structured data ---------- */
+function parseDelimited(s, d) {
+  const rows = []; let row = [], v = '', q = false;
+  s = s.replace(/^\uFEFF/, '');
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === '"' && s[i + 1] === '"') { v += '"'; i++; } else if (c === '"') q = false; else v += c; }
+    else if (c === '"') q = true;
+    else if (c === d) { row.push(v); v = ''; }
+    else if (c === '\n') { row.push(v.replace(/\r$/, '')); rows.push(row); row = []; v = ''; }
+    else v += c;
+  }
+  row.push(v.replace(/\r$/, '')); if (row.some(x => x !== '')) rows.push(row);
+  return rows;
+}
+function xmlToObj(el) {
+  const kids = [...el.children], obj = {};
+  for (const a of el.attributes) obj['@' + a.name] = a.value;
+  if (!kids.length) return Object.keys(obj).length ? { ...obj, '#text': el.textContent } : el.textContent;
+  for (const k of kids) {
+    const v = xmlToObj(k);
+    if (k.tagName in obj) { if (!Array.isArray(obj[k.tagName])) obj[k.tagName] = [obj[k.tagName]]; obj[k.tagName].push(v); } else obj[k.tagName] = v;
+  }
+  return obj;
+}
+async function loadData(f, kind) {
+  if (kind === 'json') return { raw: JSON.parse(await f.text()) };
+  if (kind === 'yaml') { await lib('yaml'); return { raw: jsyaml.load(await f.text()) }; }
+  if (kind === 'xml') {
+    const doc = new DOMParser().parseFromString(await f.text(), 'application/xml');
+    if (doc.querySelector('parsererror')) throw new Error('This XML file is not valid.');
+    return { raw: { [doc.documentElement.tagName]: xmlToObj(doc.documentElement) } };
+  }
+  if (kind === 'table') {
+    const rows = parseDelimited(await f.text(), ext(f.name) === 'tsv' ? '\t' : ',');
+    if (rows.length < 1) throw new Error('This file is empty.');
+    const h = rows[0].map((x, i) => x || 'column' + (i + 1));
+    return { rows: rows.slice(1).map(r => Object.fromEntries(h.map((k, i) => [k, r[i] ?? '']))) };
+  }
+  await lib('xlsx');
+  const wb = XLSX.read(await f.arrayBuffer(), { type: 'array' });
+  return { rows: XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }) };
+}
+const flat = o => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v !== null && typeof v === 'object' ? JSON.stringify(v) : v]));
+function rowsOf(d) {
+  if (d.rows) return d.rows;
+  let r = d.raw;
+  if (!Array.isArray(r) && r && typeof r === 'object') { const arr = Object.values(r).find(Array.isArray); r = arr || [r]; }
+  if (!Array.isArray(r)) r = [r];
+  return r.map(x => x !== null && typeof x === 'object' && !Array.isArray(x) ? flat(x) : { value: x });
+}
+const tag = k => { k = String(k).replace(/[^\w.-]/g, '_'); return /^[a-zA-Z_]/.test(k) ? k : '_' + k; };
+async function dataTo(f, kind, target) {
+  const d = await loadData(f, kind), whole = d.raw !== undefined ? d.raw : d.rows;
+  if (target === 'json') return textBlob(JSON.stringify(whole, null, 2), 'application/json');
+  if (target === 'txt') return textBlob(typeof whole === 'string' ? whole : JSON.stringify(whole, null, 2), 'text/plain');
+  if (target === 'yaml') { await lib('yaml'); return textBlob(jsyaml.dump(whole), 'text/yaml'); }
+  const rows = rowsOf(d);
+  if (target === 'xml') {
+    const x = rows.map(r => '  <row>\n' + Object.entries(r).map(([k, v]) => `    <${tag(k)}>${escapeHtml(v ?? '')}</${tag(k)}>`).join('\n') + '\n  </row>').join('\n');
+    return textBlob('<?xml version="1.0" encoding="UTF-8"?>\n<rows>\n' + x + '\n</rows>', 'application/xml');
+  }
+  if (target === 'html') {
+    const keys = [...new Set(rows.flatMap(r => Object.keys(r)))];
+    const t = '<table border="1" cellpadding="6" style="border-collapse:collapse"><thead><tr>' + keys.map(k => '<th>' + escapeHtml(k) + '</th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + keys.map(k => '<td>' + escapeHtml(r[k] ?? '') + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+    return textBlob('<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(baseName(f.name)) + '</title></head><body>' + t + '</body></html>', 'text/html');
+  }
+  await lib('xlsx');
+  const ws = XLSX.utils.json_to_sheet(rows);
+  if (target === 'csv') return textBlob('\uFEFF' + XLSX.utils.sheet_to_csv(ws), 'text/csv');
+  if (target === 'tsv') return textBlob(XLSX.utils.sheet_to_csv(ws, { FS: '\t' }), 'text/tab-separated-values');
+  if (target === 'xlsx') { const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Sheet1'); return new Blob([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); }
+  throw new Error('Unsupported target.');
+}
+
+/* ---------- audio & video (ffmpeg.wasm, loaded on demand) ---------- */
+let ffPromise = null, ffProgress = () => {};
+function getFFmpeg() {
+  if (ffPromise) return ffPromise;
+  ffPromise = (async () => {
+    await Promise.all([lib('ffmpeg'), lib('ffutil')]);
+    const ff = new FFmpegWASM.FFmpeg(), { toBlobURL } = FFmpegUtil;
+    const core = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd', own = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd';
+    ff.on('progress', ({ progress }) => ffProgress(Math.max(0, Math.min(1, progress))));
+    await ff.load({
+      coreURL: await toBlobURL(core + '/ffmpeg-core.js', 'text/javascript'),
+      wasmURL: await toBlobURL(core + '/ffmpeg-core.wasm', 'application/wasm'),
+      classWorkerURL: await toBlobURL(own + '/814.ffmpeg.js', 'text/javascript')
+    });
+    return ff;
+  })().catch(e => { ffPromise = null; throw new Error('Could not start the audio/video engine. ' + (e.message || '')); });
+  return ffPromise;
+}
+const FF_ARGS = {
+  mp3: ['-vn', '-c:a', 'libmp3lame', '-q:a', '2'],
+  wav: ['-vn'],
+  ogg: ['-vn', '-c:a', 'libvorbis', '-q:a', '5'],
+  flac: ['-vn', '-c:a', 'flac'],
+  m4a: ['-vn', '-c:a', 'aac', '-b:a', '192k'],
+  mp4: ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart'],
+  webm: ['-c:v', 'libvpx', '-b:v', '1M', '-deadline', 'realtime', '-cpu-used', '5', '-c:a', 'libvorbis'],
+  gif: ['-vf', 'fps=12,scale=480:-1:flags=lanczos', '-an']
+};
+const MIME = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif' };
+async function mediaTo(f, target, prog) {
+  const ff = await getFFmpeg(), inName = 'in.' + (ext(f.name) || 'bin'), outName = 'out.' + target;
+  ffProgress = prog;
+  try {
+    await ff.writeFile(inName, new Uint8Array(await f.arrayBuffer()));
+    const code = await ff.exec(['-i', inName, ...FF_ARGS[target], outName]);
+    if (code !== 0) throw new Error('This file could not be converted. It may use an unsupported codec.');
+    const data = await ff.readFile(outName);
+    return new Blob([data.buffer], { type: MIME[target] });
+  } finally {
+    ffProgress = () => {};
+    try { await ff.deleteFile(inName); } catch (_) {}
+    try { await ff.deleteFile(outName); } catch (_) {}
+  }
+}
+
+/* ---------- dispatcher ---------- */
+async function convert(item, prog) {
+  const { file: f, kind, target } = item, name = baseName(f.name) + '.' + target;
+  if (target === 'zip') { await lib('jszip'); const z = new JSZip(); z.file(f.name, f); return { blob: await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), name }; }
+  let blob;
+  if (kind === 'image') blob = await imageTo(f, target);
+  else if (kind === 'pdf') return pdfTo(f, target, prog);
+  else if (kind === 'docx') blob = await docxTo(f, target);
+  else if (kind === 'text') blob = await textTo(f, target);
+  else if (kind === 'audio' || kind === 'video') blob = await mediaTo(f, target, prog);
+  else blob = await dataTo(f, kind, target);
+  return { blob, name };
+}
+
+/* ---------- UI ---------- */
+let items = [], uid = 0, busy = false;
+const mk = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+function render() {
+  $('actions').style.display = items.length ? 'flex' : 'none';
+  $('zipAll').disabled = !items.some(i => i.result);
+  $('convertAll').disabled = busy || !items.some(i => i.target && !i.result);
+  $('list').replaceChildren(...items.map(rowEl));
+}
+function rowEl(it) {
+  const row = mk('div', 'row');
+  row.appendChild(mk('div', 'fileicon', ext(it.file.name).slice(0, 4) || '?'));
+  const meta = mk('div', 'meta');
+  meta.appendChild(mk('div', 'fname', it.file.name));
+  const sub = mk('div', 'fsub' + (it.state === 'done' ? ' ok' : it.state === 'error' ? ' err' : ''),
+    it.state === 'done' ? 'Done · ' + fmtBytes(it.result.blob.size) : it.state === 'error' ? it.error : it.state === 'working' ? 'Converting… ' + Math.round(it.pct * 100) + '%' : fmtBytes(it.file.size) + ' · ' + (it.kind === 'other' ? 'Other file' : it.kind));
+  meta.appendChild(sub);
+  const bar = mk('div', 'bar'), fill = document.createElement('i'); fill.style.width = Math.round(it.pct * 100) + '%'; bar.appendChild(fill);
+  if (it.state === 'working') bar.style.display = 'block';
+  it.ui = { sub, fill };
+  meta.appendChild(bar);
+  row.appendChild(meta);
+  const ctl = mk('div', 'rctl');
+  const sel = document.createElement('select'); sel.setAttribute('aria-label', 'Output format for ' + it.file.name);
+  sel.appendChild(new Option('Convert to…', ''));
+  it.targets.forEach(t => sel.add(new Option(LABEL[t] || t.toUpperCase(), t)));
+  sel.value = it.target; sel.disabled = busy;
+  sel.onchange = () => { it.target = sel.value; it.result = null; it.state = 'idle'; render(); };
+  ctl.appendChild(sel);
+  if (it.state === 'done') {
+    const a = mk('a', 'btn dl', 'Download'); a.href = it.url; a.download = it.result.name; ctl.appendChild(a);
+  } else {
+    const b = mk('button', 'btn', 'Convert'); b.disabled = busy || !it.target; b.onclick = () => run([it]); ctl.appendChild(b);
+  }
+  const x = mk('button', 'x', '×'); x.setAttribute('aria-label', 'Remove ' + it.file.name); x.disabled = busy;
+  x.onclick = () => { if (it.url) URL.revokeObjectURL(it.url); items = items.filter(i => i !== it); render(); };
+  ctl.appendChild(x);
+  row.appendChild(ctl);
+  return row;
+}
+function addFiles(list) {
+  for (const f of list) {
+    const kind = kindOf(f), targets = targetsFor(f, kind);
+    items.push({ id: ++uid, file: f, kind, targets, target: targets.length === 1 ? targets[0] : '', state: 'idle', pct: 0, result: null, url: null, error: '' });
+  }
+  render();
+}
+async function run(list) {
+  if (busy) return;
+  busy = true; render();
+  for (const it of list) {
+    if (!it.target || it.result) continue;
+    it.state = 'working'; it.pct = 0; render();
+    const prog = p => { it.pct = p; if (it.ui) { it.ui.fill.style.width = Math.round(p * 100) + '%'; it.ui.sub.textContent = 'Converting… ' + Math.round(p * 100) + '%'; } };
+    try {
+      const r = await convert(it, prog);
+      it.result = r; it.url = URL.createObjectURL(r.blob); it.state = 'done';
+    } catch (e) { it.state = 'error'; it.error = e.message || 'Conversion failed. Please try another file.'; }
+    render();
+  }
+  busy = false; render();
+}
+$('convertAll').onclick = () => run(items.filter(i => i.target && !i.result));
+$('zipAll').onclick = async () => {
+  try {
+    await lib('jszip'); const z = new JSZip(), used = {};
+    items.filter(i => i.result).forEach(i => { let n = i.result.name; if (used[n]) { const e = ext(n); n = baseName(n) + '-' + used[n] + '.' + e; } used[i.result.name] = (used[i.result.name] || 0) + 1; z.file(n, i.result.blob); });
+    const url = URL.createObjectURL(await z.generateAsync({ type: 'blob' }));
+    const a = mk('a'); a.href = url; a.download = 'converted-files.zip'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (e) { alert(e.message); }
+};
+$('clear').onclick = () => { if (busy) return; items.forEach(i => i.url && URL.revokeObjectURL(i.url)); items = []; $('file').value = ''; render(); };
+
+const drop = $('drop');
+drop.onclick = () => $('file').click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } };
+$('file').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('drag'); };
+drop.ondragleave = () => drop.classList.remove('drag');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('drag'); addFiles([...e.dataTransfer.files]); };
+</script>
+</body>
+</html>
