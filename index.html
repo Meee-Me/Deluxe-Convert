@@ -69,7 +69,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose files to convert">
  <div class="uploadicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v4h16v-4"/></svg></div>
  <strong>Drop your files here</strong><small>or <span class="browse">browse files</span> · select as many as you like</small>
- <div class="chips"><span class="chip">Images</span><span class="chip">PDF</span><span class="chip">Word</span><span class="chip">Excel / CSV</span><span class="chip">JSON / YAML / XML</span><span class="chip">Text / HTML / MD</span><span class="chip">Audio</span><span class="chip">Video</span><span class="chip">Any file → ZIP</span></div>
+ <div class="chips"><span class="chip">Images / HEIC / TIFF / PSD</span><span class="chip">PDF</span><span class="chip">Word / PowerPoint / ODT</span><span class="chip">Excel / CSV</span><span class="chip">JSON / YAML / XML</span><span class="chip">Text / HTML / MD</span><span class="chip">Audio</span><span class="chip">Video</span><span class="chip">Any file → ZIP</span></div>
  <input type="file" id="file" multiple hidden>
 </div>
 
@@ -109,6 +109,11 @@ const LIBS = {
   yaml: CDN + 'js-yaml@4.1.0/dist/js-yaml.min.js',
   marked: CDN + 'marked@12.0.2/marked.min.js',
   turndown: CDN + 'turndown@7.2.0/lib/turndown.browser.umd.js',
+  heic2any: CDN + 'heic2any@0.0.4/dist/heic2any.min.js',
+  pako: CDN + 'pako@2.1.0/dist/pako.min.js',
+  utif: CDN + 'utif@3.1.0/UTIF.js',
+  agpsd: CDN + 'ag-psd@28.2.1/dist/bundle.js',
+  pptx: CDN + 'pptxgenjs@3.12.0/dist/pptxgen.bundle.js',
   ffmpeg: 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js',
   ffutil: 'https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js'
 };
@@ -127,26 +132,26 @@ function lib(name) {
 /* ---------- format registry ---------- */
 const KIND = {};
 const def = (kind, list) => list.split(' ').forEach(e => KIND[e] = kind);
-def('image', 'png jpg jpeg webp gif bmp svg avif ico');
-def('pdf', 'pdf'); def('docx', 'docx');
-def('sheet', 'xlsx xls ods'); def('table', 'csv tsv');
+def('image', 'png jpg jpeg webp gif bmp svg avif ico heic heif tif tiff psd');
+def('pdf', 'pdf'); def('docx', 'docx'); def('office', 'pptx odt odp rtf');
+def('sheet', 'xlsx xls ods xlsm xlsb fods'); def('table', 'csv tsv');
 def('json', 'json'); def('yaml', 'yaml yml'); def('xml', 'xml');
 def('text', 'txt md markdown html htm');
 def('audio', 'mp3 wav ogg oga m4a aac flac opus wma');
 def('video', 'mp4 webm mov mkv avi m4v flv');
 const DATA_OUT = ['json', 'csv', 'tsv', 'xlsx', 'yaml', 'xml', 'html', 'txt'];
-const DOC_OUT = ['txt', 'html', 'md', 'pdf', 'docx', 'rtf', 'json', 'xml', 'png', 'jpg'];
+const DOC_OUT = ['txt', 'html', 'md', 'pdf', 'docx', 'odt', 'pptx', 'rtf', 'json', 'xml', 'png', 'jpg'];
 const AUDIO_OUT = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'opus'];
 const OUT = {
-  image: ['png', 'jpg', 'webp', 'bmp', 'ico', 'pdf'],
-  pdf: DOC_OUT, docx: DOC_OUT, text: DOC_OUT,
+  image: ['png', 'jpg', 'webp', 'bmp', 'ico', 'tiff', 'pdf'],
+  pdf: DOC_OUT, docx: DOC_OUT, text: DOC_OUT, office: DOC_OUT,
   sheet: DATA_OUT, table: DATA_OUT, json: DATA_OUT, yaml: DATA_OUT,
   xml: ['json', 'yaml', 'txt'],
   audio: AUDIO_OUT,
   video: ['mp4', 'webm', 'mkv', 'mov', 'avi', 'gif', ...AUDIO_OUT],
   other: []
 };
-const LABEL = { docx: 'Word (DOCX)', rtf: 'RTF', aac: 'AAC', opus: 'Opus', mkv: 'MKV', mov: 'MOV', avi: 'AVI', jpg: 'JPEG', png: 'PNG', webp: 'WebP', bmp: 'BMP', ico: 'ICO', pdf: 'PDF', txt: 'TXT', html: 'HTML', md: 'Markdown', json: 'JSON', csv: 'CSV', tsv: 'TSV', xlsx: 'Excel (XLSX)', yaml: 'YAML', xml: 'XML', mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A (AAC)', mp4: 'MP4', webm: 'WebM', gif: 'GIF', zip: 'ZIP archive' };
+const LABEL = { pptx: 'PowerPoint (PPTX)', odt: 'OpenDocument (ODT)', tiff: 'TIFF', docx: 'Word (DOCX)', rtf: 'RTF', aac: 'AAC', opus: 'Opus', mkv: 'MKV', mov: 'MOV', avi: 'AVI', jpg: 'JPEG', png: 'PNG', webp: 'WebP', bmp: 'BMP', ico: 'ICO', pdf: 'PDF', txt: 'TXT', html: 'HTML', md: 'Markdown', json: 'JSON', csv: 'CSV', tsv: 'TSV', xlsx: 'Excel (XLSX)', yaml: 'YAML', xml: 'XML', mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A (AAC)', mp4: 'MP4', webm: 'WebM', gif: 'GIF', zip: 'ZIP archive' };
 const norm = e => ({ jpeg: 'jpg', yml: 'yaml', htm: 'html', markdown: 'md' }[e] || e);
 function kindOf(f) {
   const e = ext(f.name);
@@ -170,7 +175,28 @@ const canvasBlob = (c, mime, q) => new Promise((res, rej) => c.toBlob(b => b ? r
 const bytesOf = async blob => new Uint8Array(await blob.arrayBuffer());
 
 /* ---------- images ---------- */
+async function normalizeImage(f) {
+  const e = ext(f.name);
+  if (e === 'heic' || e === 'heif') { await lib('heic2any'); const r = await heic2any({ blob: f, toType: 'image/png' }); return Array.isArray(r) ? r[0] : r; }
+  if (e === 'tif' || e === 'tiff') {
+    await lib('pako'); await lib('utif');
+    const buf = await f.arrayBuffer(), ifds = UTIF.decode(buf);
+    if (!ifds.length) throw new Error('This TIFF file could not be read.');
+    UTIF.decodeImage(buf, ifds[0]);
+    const c = document.createElement('canvas'); c.width = ifds[0].width; c.height = ifds[0].height;
+    c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(UTIF.toRGBA8(ifds[0])), c.width, c.height), 0, 0);
+    return canvasBlob(c, 'image/png');
+  }
+  if (e === 'psd') {
+    await lib('agpsd');
+    const psd = agPsd.readPsd(await f.arrayBuffer(), { skipLayerImageData: true, skipThumbnail: true });
+    if (!psd.canvas) throw new Error('This PSD file has no flattened preview to convert.');
+    return canvasBlob(psd.canvas, 'image/png');
+  }
+  return f;
+}
 async function loadImage(f) {
+  f = await normalizeImage(f);
   const url = URL.createObjectURL(f);
   try {
     const img = new Image();
@@ -213,6 +239,11 @@ async function imageTo(f, target) {
   if (target === 'webp') return canvasBlob(src.c, 'image/webp', .92);
   if (target === 'bmp') return encodeBMP(src.c);
   if (target === 'ico') return encodeICO(src);
+  if (target === 'tiff') {
+    await lib('pako'); await lib('utif');
+    const d = src.ctx.getImageData(0, 0, src.w, src.h);
+    return new Blob([UTIF.encodeImage(new Uint8Array(d.data.buffer), src.w, src.h)], { type: 'image/tiff' });
+  }
   if (target === 'pdf') {
     await lib('jspdf');
     const { jsPDF } = window.jspdf;
@@ -308,8 +339,51 @@ async function pdfText(f, prog) {
   return out.trim();
 }
 const textAsHtml = t => t.split(/\n{2,}/).map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>').join('\n');
+const rtfToText = s => s.replace(/\{\\(fonttbl|colortbl|stylesheet|info|\*)(\{[^{}]*\}|[^{}])*\}/g, '').replace(/\\par[d]?/g, '\n').replace(/\\'([0-9a-f]{2})/gi, (m, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\u(-?\d+)\??/g, (m, n) => String.fromCharCode(n < 0 ? +n + 65536 : +n)).replace(/\\[a-z]+-?\d* ?/gi, '').replace(/\\([\\{}])/g, '$1').replace(/[{}]/g, '').trim();
+async function officeText(f) {
+  const e = ext(f.name);
+  if (e === 'rtf') return rtfToText(await f.text());
+  await lib('jszip');
+  const z = await JSZip.loadAsync(await f.arrayBuffer());
+  const parse = async p => { const fl = z.file(p); if (!fl) throw new Error('This is not a valid ' + e.toUpperCase() + ' file.'); return new DOMParser().parseFromString(await fl.async('string'), 'application/xml'); };
+  const grab = (root, tags) => [...root.getElementsByTagName('*')].filter(n => tags.includes(n.tagName));
+  if (e === 'pptx') {
+    const names = Object.keys(z.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a, b) => parseInt(a.match(/\d+/g).pop()) - parseInt(b.match(/\d+/g).pop()));
+    const out = [];
+    for (let i = 0; i < names.length; i++) {
+      const d = await parse(names[i]);
+      const paras = [...d.getElementsByTagName('a:p')].map(p => [...p.getElementsByTagName('a:t')].map(t => t.textContent).join('')).filter(Boolean);
+      out.push('Slide ' + (i + 1) + '\n' + paras.join('\n'));
+    }
+    return out.join('\n\n');
+  }
+  const d = await parse('content.xml');
+  if (e === 'odp') return grab(d, ['draw:page']).map((pg, i) => 'Slide ' + (i + 1) + '\n' + grab(pg, ['text:p', 'text:h']).map(n => n.textContent).filter(Boolean).join('\n')).join('\n\n');
+  return grab(d, ['text:p', 'text:h']).map(n => n.textContent).join('\n');
+}
+async function buildOdt(text) {
+  await lib('jszip');
+  const hdr = '<?xml version="1.0" encoding="UTF-8"?>', z = new JSZip();
+  z.file('mimetype', 'application/vnd.oasis.opendocument.text', { compression: 'STORE' });
+  z.file('META-INF/manifest.xml', hdr + '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.text"/><manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/></manifest:manifest>');
+  z.file('content.xml', hdr + '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2"><office:body><office:text>' + text.split(/\r?\n/).map(l => '<text:p>' + xmlEsc(l) + '</text:p>').join('') + '</office:text></office:body></office:document-content>');
+  return z.generateAsync({ type: 'blob', mimeType: 'application/vnd.oasis.opendocument.text' });
+}
+async function buildPptx(text, title) {
+  await lib('pptx');
+  const pres = new PptxGenJS(); pres.title = title;
+  const slides = []; let cur = [], n = 0;
+  for (const b of text.split(/\n{2,}/).map(x => x.trim()).filter(Boolean)) {
+    if (cur.length && n + b.length > 900) { slides.push(cur); cur = []; n = 0; }
+    cur.push(...b.split('\n')); n += b.length;
+  }
+  if (cur.length) slides.push(cur); else slides.push(['']);
+  slides.forEach(ls => pres.addSlide().addText(ls.map(l => ({ text: l, options: { breakLine: true } })), { x: .5, y: .4, w: 9, h: 4.7, fontSize: 16, valign: 'top', fit: 'shrink' }));
+  return pres.write({ outputType: 'blob' });
+}
 async function docParts(f, kind, prog) {
   const src = norm(ext(f.name));
+  if (kind === 'office') { const t = await officeText(f); return { text: t, html: textAsHtml(t), md: t }; }
   if (kind === 'docx') {
     await lib('mammoth'); const ab = await f.arrayBuffer();
     return { text: (await mammoth.extractRawText({ arrayBuffer: ab })).value, html: (await mammoth.convertToHtml({ arrayBuffer: ab })).value, md: null };
@@ -336,6 +410,8 @@ async function docConvert(f, kind, target, prog) {
   if (target === 'html') return textBlob('<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(title) + '</title></head><body>' + p.html + '</body></html>', 'text/html');
   if (target === 'md') { if (p.md !== null) return textBlob(p.md, 'text/markdown'); await lib('turndown'); return textBlob(new TurndownService({ headingStyle: 'atx' }).turndown(p.html), 'text/markdown'); }
   if (target === 'docx') return buildDocx(p.text);
+  if (target === 'odt') return buildOdt(p.text);
+  if (target === 'pptx') return buildPptx(p.text, title);
   if (target === 'rtf') return textBlob('{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\\f0\\fs22 ' + lines.map(rtfEsc).join('\\par\n') + '}', 'application/rtf');
   if (target === 'json') return textBlob(JSON.stringify({ title, paragraphs: lines.filter(l => l.trim()) }, null, 2), 'application/json');
   if (target === 'xml') return textBlob('<?xml version="1.0" encoding="UTF-8"?>\n<document>\n' + lines.filter(l => l.trim()).map(l => '  <paragraph>' + xmlEsc(l) + '</paragraph>').join('\n') + '\n</document>', 'application/xml');
@@ -475,7 +551,7 @@ async function convert(item, prog) {
   if (target === 'zip') { await lib('jszip'); const z = new JSZip(); z.file(f.name, f); return { blob: await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), name }; }
   let blob;
   if (kind === 'image') blob = await imageTo(f, target);
-  else if (kind === 'pdf' || kind === 'docx' || kind === 'text') { const r = await docConvert(f, kind, target, prog); if (r.blob) return r; blob = r; }
+  else if (kind === 'pdf' || kind === 'docx' || kind === 'text' || kind === 'office') { const r = await docConvert(f, kind, target, prog); if (r.blob) return r; blob = r; }
   else if (kind === 'audio' || kind === 'video') blob = await mediaTo(f, target, prog);
   else blob = await dataTo(f, kind, target);
   return { blob, name };

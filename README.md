@@ -6,8 +6,8 @@ A private, browser-based file converter. Static site, no build step, no server. 
 
 | Input | Output |
 |---|---|
-| Images (PNG, JPG, WebP, GIF, BMP, SVG, AVIF, ICO) | PNG, JPG, WebP, BMP, ICO, PDF |
-| PDF, Word (.docx), TXT, Markdown, HTML | TXT, HTML, Markdown, PDF, DOCX, RTF, JSON, XML, PNG, JPG (PDF/DOCX/RTF built from plain text: layout and formatting are not preserved) |
+| Images (PNG, JPG, WebP, GIF, BMP, SVG, AVIF, ICO, HEIC/HEIF, TIFF, PSD) | PNG, JPG, WebP, BMP, ICO, TIFF, PDF |
+| PDF, Word (.docx), PowerPoint (.pptx), OpenDocument (.odt, .odp), RTF, TXT, Markdown, HTML | TXT, HTML, Markdown, PDF, DOCX, ODT, PPTX, RTF, JSON, XML, PNG, JPG (text only: layout, fonts and images are not preserved) |
 | Excel (.xlsx, .xls, .ods), CSV, TSV, JSON, YAML | JSON, CSV, TSV, XLSX, YAML, XML, HTML, TXT |
 | XML | JSON, YAML, TXT |
 | Audio (MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, WMA) | MP3, WAV, OGG, FLAC, M4A, AAC, Opus |
@@ -15,6 +15,7 @@ A private, browser-based file converter. Static site, no build step, no server. 
 | Any other file | ZIP |
 
 Notes:
+- Not supported: legacy binary Office files (.doc, .ppt) and camera RAW. Re-save them as .docx / .pptx first. PSD uses the flattened preview; RTF input is basic.
 - Spreadsheets: only the first sheet is converted.
 - Text-to-PDF uses a standard Latin font, so non-Latin scripts will not render in PDFs.
 - Video conversion runs in WebAssembly and is slow for large files. Very large files may run out of browser memory.
