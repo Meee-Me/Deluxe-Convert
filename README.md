@@ -1,6 +1,10 @@
 # Deluxe Convert
 
+**Live:** https://deluxe-convert.netlify.app
+
 A private, browser-based file converter. Static site, no build step, no server. Files never leave the user's device.
+
+Typed output formats: after adding files, type a format (e.g. `pdf`, `mp3`) to apply it to every file that supports it.
 
 ## Supported conversions
 
