@@ -7,13 +7,11 @@ A private, browser-based file converter. Static site, no build step, no server. 
 | Input | Output |
 |---|---|
 | Images (PNG, JPG, WebP, GIF, BMP, SVG, AVIF, ICO) | PNG, JPG, WebP, BMP, ICO, PDF |
-| PDF | PNG / JPG (one file, or a ZIP of pages), TXT |
-| Word (.docx) | HTML, TXT, Markdown, PDF |
+| PDF, Word (.docx), TXT, Markdown, HTML | TXT, HTML, Markdown, PDF, DOCX, RTF, JSON, XML, PNG, JPG (PDF/DOCX/RTF built from plain text: layout and formatting are not preserved) |
 | Excel (.xlsx, .xls, .ods), CSV, TSV, JSON, YAML | JSON, CSV, TSV, XLSX, YAML, XML, HTML, TXT |
 | XML | JSON, YAML, TXT |
-| TXT, Markdown, HTML | TXT, HTML, Markdown, PDF |
-| Audio (MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, WMA) | MP3, WAV, OGG, FLAC, M4A |
-| Video (MP4, WebM, MOV, MKV, AVI, M4V, FLV) | MP4, WebM, GIF, MP3, WAV, M4A |
+| Audio (MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, WMA) | MP3, WAV, OGG, FLAC, M4A, AAC, Opus |
+| Video (MP4, WebM, MOV, MKV, AVI, M4V, FLV) | MP4, WebM, MKV, MOV, AVI, GIF, or any audio format above |
 | Any other file | ZIP |
 
 Notes:

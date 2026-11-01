@@ -135,18 +135,18 @@ def('text', 'txt md markdown html htm');
 def('audio', 'mp3 wav ogg oga m4a aac flac opus wma');
 def('video', 'mp4 webm mov mkv avi m4v flv');
 const DATA_OUT = ['json', 'csv', 'tsv', 'xlsx', 'yaml', 'xml', 'html', 'txt'];
+const DOC_OUT = ['txt', 'html', 'md', 'pdf', 'docx', 'rtf', 'json', 'xml', 'png', 'jpg'];
+const AUDIO_OUT = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'opus'];
 const OUT = {
   image: ['png', 'jpg', 'webp', 'bmp', 'ico', 'pdf'],
-  pdf: ['png', 'jpg', 'txt'],
-  docx: ['html', 'txt', 'md', 'pdf'],
+  pdf: DOC_OUT, docx: DOC_OUT, text: DOC_OUT,
   sheet: DATA_OUT, table: DATA_OUT, json: DATA_OUT, yaml: DATA_OUT,
   xml: ['json', 'yaml', 'txt'],
-  text: ['txt', 'html', 'md', 'pdf'],
-  audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a'],
-  video: ['mp4', 'webm', 'gif', 'mp3', 'wav', 'm4a'],
+  audio: AUDIO_OUT,
+  video: ['mp4', 'webm', 'mkv', 'mov', 'avi', 'gif', ...AUDIO_OUT],
   other: []
 };
-const LABEL = { jpg: 'JPEG', png: 'PNG', webp: 'WebP', bmp: 'BMP', ico: 'ICO', pdf: 'PDF', txt: 'TXT', html: 'HTML', md: 'Markdown', json: 'JSON', csv: 'CSV', tsv: 'TSV', xlsx: 'Excel (XLSX)', yaml: 'YAML', xml: 'XML', mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A (AAC)', mp4: 'MP4', webm: 'WebM', gif: 'GIF', zip: 'ZIP archive' };
+const LABEL = { docx: 'Word (DOCX)', rtf: 'RTF', aac: 'AAC', opus: 'Opus', mkv: 'MKV', mov: 'MOV', avi: 'AVI', jpg: 'JPEG', png: 'PNG', webp: 'WebP', bmp: 'BMP', ico: 'ICO', pdf: 'PDF', txt: 'TXT', html: 'HTML', md: 'Markdown', json: 'JSON', csv: 'CSV', tsv: 'TSV', xlsx: 'Excel (XLSX)', yaml: 'YAML', xml: 'XML', mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A (AAC)', mp4: 'MP4', webm: 'WebM', gif: 'GIF', zip: 'ZIP archive' };
 const norm = e => ({ jpeg: 'jpg', yml: 'yaml', htm: 'html', markdown: 'md' }[e] || e);
 function kindOf(f) {
   const e = ext(f.name);
@@ -292,6 +292,58 @@ async function textTo(f, target) {
   throw new Error('Unsupported target.');
 }
 
+/* ---------- unified document pipeline (docx / pdf / text -> many) ---------- */
+const xmlEsc = s => escapeHtml(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+const rtfEsc = s => s.replace(/[\\{}]/g, m => '\\' + m).replace(/[^\x00-\x7F]/g, c => { const n = c.charCodeAt(0); return '\\u' + (n > 32767 ? n - 65536 : n) + '?'; });
+async function pdfText(f, prog) {
+  await lib('pdfjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+  const doc = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+  let out = '';
+  for (let i = 1; i <= doc.numPages; i++) {
+    const tc = await (await doc.getPage(i)).getTextContent();
+    out += tc.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('') + '\n\n';
+    prog(i / doc.numPages);
+  }
+  return out.trim();
+}
+const textAsHtml = t => t.split(/\n{2,}/).map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>').join('\n');
+async function docParts(f, kind, prog) {
+  const src = norm(ext(f.name));
+  if (kind === 'docx') {
+    await lib('mammoth'); const ab = await f.arrayBuffer();
+    return { text: (await mammoth.extractRawText({ arrayBuffer: ab })).value, html: (await mammoth.convertToHtml({ arrayBuffer: ab })).value, md: null };
+  }
+  if (kind === 'pdf') { const t = await pdfText(f, prog); return { text: t, html: textAsHtml(t), md: t }; }
+  const s = await f.text();
+  if (src === 'html') return { text: htmlToText(s), html: s, md: null };
+  if (src === 'md') { await lib('marked'); return { text: s, html: marked.parse(s), md: s }; }
+  return { text: s, html: '<pre>' + escapeHtml(s) + '</pre>', md: s };
+}
+async function buildDocx(text) {
+  await lib('jszip');
+  const hdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', z = new JSZip();
+  z.file('[Content_Types].xml', hdr + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+  z.file('_rels/.rels', hdr + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+  const body = text.split(/\r?\n/).map(l => '<w:p><w:r><w:t xml:space="preserve">' + xmlEsc(l) + '</w:t></w:r></w:p>').join('');
+  z.file('word/document.xml', hdr + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body + '</w:body></w:document>');
+  return z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+async function docConvert(f, kind, target, prog) {
+  if (kind === 'pdf' && (target === 'png' || target === 'jpg')) return pdfTo(f, target, prog);
+  const p = await docParts(f, kind, prog), title = baseName(f.name), lines = p.text.split(/\r?\n/);
+  if (target === 'txt') return textBlob(p.text, 'text/plain');
+  if (target === 'html') return textBlob('<!doctype html><html><head><meta charset="utf-8"><title>' + escapeHtml(title) + '</title></head><body>' + p.html + '</body></html>', 'text/html');
+  if (target === 'md') { if (p.md !== null) return textBlob(p.md, 'text/markdown'); await lib('turndown'); return textBlob(new TurndownService({ headingStyle: 'atx' }).turndown(p.html), 'text/markdown'); }
+  if (target === 'docx') return buildDocx(p.text);
+  if (target === 'rtf') return textBlob('{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Arial;}}\\f0\\fs22 ' + lines.map(rtfEsc).join('\\par\n') + '}', 'application/rtf');
+  if (target === 'json') return textBlob(JSON.stringify({ title, paragraphs: lines.filter(l => l.trim()) }, null, 2), 'application/json');
+  if (target === 'xml') return textBlob('<?xml version="1.0" encoding="UTF-8"?>\n<document>\n' + lines.filter(l => l.trim()).map(l => '  <paragraph>' + xmlEsc(l) + '</paragraph>').join('\n') + '\n</document>', 'application/xml');
+  const pdf = await textToPdf(p.text);
+  if (target === 'pdf') return pdf;
+  return pdfTo(new File([pdf], title + '.pdf', { type: 'application/pdf' }), target, prog);
+}
+
 /* ---------- structured data ---------- */
 function parseDelimited(s, d) {
   const rows = []; let row = [], v = '', q = false;
@@ -391,11 +443,16 @@ const FF_ARGS = {
   ogg: ['-vn', '-c:a', 'libvorbis', '-q:a', '5'],
   flac: ['-vn', '-c:a', 'flac'],
   m4a: ['-vn', '-c:a', 'aac', '-b:a', '192k'],
+  aac: ['-vn', '-c:a', 'aac', '-b:a', '192k'],
+  opus: ['-vn', '-c:a', 'libopus', '-b:a', '128k'],
+  mkv: ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k'],
+  mov: ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k'],
+  avi: ['-c:v', 'mpeg4', '-q:v', '5', '-c:a', 'libmp3lame', '-q:a', '4'],
   mp4: ['-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart'],
   webm: ['-c:v', 'libvpx', '-b:v', '1M', '-deadline', 'realtime', '-cpu-used', '5', '-c:a', 'libvorbis'],
   gif: ['-vf', 'fps=12,scale=480:-1:flags=lanczos', '-an']
 };
-const MIME = { mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif' };
+const MIME = { aac: 'audio/aac', opus: 'audio/ogg', mkv: 'video/x-matroska', mov: 'video/quicktime', avi: 'video/x-msvideo', mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg', flac: 'audio/flac', m4a: 'audio/mp4', mp4: 'video/mp4', webm: 'video/webm', gif: 'image/gif' };
 async function mediaTo(f, target, prog) {
   const ff = await getFFmpeg(), inName = 'in.' + (ext(f.name) || 'bin'), outName = 'out.' + target;
   ffProgress = prog;
@@ -418,9 +475,7 @@ async function convert(item, prog) {
   if (target === 'zip') { await lib('jszip'); const z = new JSZip(); z.file(f.name, f); return { blob: await z.generateAsync({ type: 'blob', compression: 'DEFLATE' }), name }; }
   let blob;
   if (kind === 'image') blob = await imageTo(f, target);
-  else if (kind === 'pdf') return pdfTo(f, target, prog);
-  else if (kind === 'docx') blob = await docxTo(f, target);
-  else if (kind === 'text') blob = await textTo(f, target);
+  else if (kind === 'pdf' || kind === 'docx' || kind === 'text') { const r = await docConvert(f, kind, target, prog); if (r.blob) return r; blob = r; }
   else if (kind === 'audio' || kind === 'video') blob = await mediaTo(f, target, prog);
   else blob = await dataTo(f, kind, target);
   return { blob, name };
