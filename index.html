@@ -59,6 +59,23 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 .feature{border:1px solid var(--line);border-radius:16px;padding:17px;background:#101a2a99}
 .feature b{display:block;margin:7px 0 3px}.feature p{font-size:12px;color:var(--muted);margin:0}.ficon{font-size:21px}
 .footer{text-align:center;color:#70819c;font-size:12px;margin-top:30px}
+.creditsbtn{margin-top:10px;border:1px solid var(--line);background:#101a2a99;color:#b9c6df;border-radius:30px;padding:8px 18px;font:700 12px inherit;letter-spacing:1px;cursor:pointer;transition:.2s}
+.creditsbtn:hover{border-color:var(--cyan);color:#fff}
+.credits{display:none;position:fixed;inset:0;z-index:100;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,#20204b 0,transparent 60%),#05070f}
+.credits.open{display:block}
+.credits::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 20% 30%,#fff9 50%,transparent 51%),radial-gradient(1px 1px at 70% 20%,#fff8 50%,transparent 51%),radial-gradient(1.5px 1.5px at 45% 75%,#9ff9 50%,transparent 51%),radial-gradient(1px 1px at 85% 65%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 10% 85%,#fff7 50%,transparent 51%);background-size:340px 340px;animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.35}to{opacity:1}}
+.cclose{position:absolute;top:16px;right:16px;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid #ffffff44;background:#0b1322cc;color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.cclose:hover{border-color:var(--cyan)}
+.roll{position:absolute;left:0;right:0;top:100%;padding:0 24px;text-align:center;animation:rollup 26s linear infinite}
+@keyframes rollup{to{transform:translateY(calc(-100% - 100vh))}}
+.roll .clogo{width:84px;height:84px;margin:0 auto 18px;border-radius:26px;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;box-shadow:0 10px 40px #7c5cff77}
+.roll .clogo svg{width:48px}
+.roll h2{font-size:clamp(30px,8vw,52px);letter-spacing:-1px;margin:0 0 70px;background:linear-gradient(90deg,#a996ff,#56e4ee);color:transparent;background-clip:text;-webkit-background-clip:text}
+.roll .role{color:#9e8dff;font-size:13px;letter-spacing:3px;font-weight:800;text-transform:uppercase;margin:0 0 10px}
+.roll .name{font-size:clamp(24px,6vw,38px);font-weight:800;margin:0 0 70px}
+.roll .thanks{color:var(--muted);margin:0 0 40px}
+@media(prefers-reduced-motion:reduce){.credits{overflow:auto}.roll{position:static;animation:none;padding:90px 24px 60px}.credits::before{animation:none}}
 @media(max-width:700px){
  .wrap{padding:18px 14px 35px}.top{margin-bottom:30px}.card{padding:15px}.features{grid-template-columns:1fr}.badge{display:none}
  .row{grid-template-columns:38px 1fr}.rctl{grid-column:1/-1;justify-content:stretch}.rctl select{flex:1;max-width:none}
@@ -101,7 +118,19 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  <div class="feature"><div class="ficon">🔒</div><b>Privacy first</b><p>No uploads, no accounts. Your files stay in your browser.</p></div>
  <div class="feature"><div class="ficon">✦</div><b>Wide format support</b><p>From PNG to PDF, XLSX to JSON, MOV to MP4 and more.</p></div>
 </section>
-<div class="footer">DELUXE CONVERT · Built for everyday file conversions<br>Directed by Shivad Sujith · AI support: Claude &amp; ChatGPT · Powered by Netlify</div>
+<div class="footer">DELUXE CONVERT · Built for everyday file conversions<br><button class="creditsbtn" id="creditsBtn">▶ Credits</button></div>
+</div>
+
+<div class="credits" id="credits" role="dialog" aria-modal="true" aria-label="Credits">
+ <button class="cclose" id="cclose" aria-label="Close credits">×</button>
+ <div class="roll">
+  <div class="clogo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h13l-4-4M19 15H6l4 4"/></svg></div>
+  <h2>DELUXE CONVERT</h2>
+  <p class="role">Directed by</p><p class="name">Shivad Sujith</p>
+  <p class="role">AI support</p><p class="name">Claude<br>ChatGPT</p>
+  <p class="role">Powered by</p><p class="name">Netlify</p>
+  <p class="thanks">Thank you for using Deluxe Convert</p>
+ </div>
 </div>
 
 <script>
@@ -671,6 +700,13 @@ function applyTyped() {
 $('typeGo').onclick = applyTyped;
 $('typeIn').onchange = applyTyped;
 $('typeIn').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); applyTyped(); } };
+
+/* credits screen */
+function openCredits() { $('credits').classList.add('open'); document.body.style.overflow = 'hidden'; $('cclose').focus(); }
+function closeCredits() { $('credits').classList.remove('open'); document.body.style.overflow = ''; $('creditsBtn').focus(); }
+$('creditsBtn').onclick = openCredits;
+$('cclose').onclick = closeCredits;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('credits').classList.contains('open')) closeCredits(); });
 </script>
 </body>
 </html>
