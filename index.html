@@ -339,7 +339,7 @@ async function pdfText(f, prog) {
   return out.trim();
 }
 const textAsHtml = t => t.split(/\n{2,}/).map(p => '<p>' + escapeHtml(p).replace(/\n/g, '<br>') + '</p>').join('\n');
-const rtfToText = s => s.replace(/\{\\(fonttbl|colortbl|stylesheet|info|\*)(\{[^{}]*\}|[^{}])*\}/g, '').replace(/\\par[d]?/g, '\n').replace(/\\'([0-9a-f]{2})/gi, (m, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\u(-?\d+)\??/g, (m, n) => String.fromCharCode(n < 0 ? +n + 65536 : +n)).replace(/\\[a-z]+-?\d* ?/gi, '').replace(/\\([\\{}])/g, '$1').replace(/[{}]/g, '').trim();
+const rtfToText = s => s.replace(/\{\\(fonttbl|colortbl|stylesheet|info|\*)(\{[^{}]*\}|[^{}])*\}/g, '').replace(/\\par[d]? ?\r?\n?/g, '\n').replace(/\\'([0-9a-f]{2})/gi, (m, h) => String.fromCharCode(parseInt(h, 16))).replace(/\\u(-?\d+)\??/g, (m, n) => String.fromCharCode(n < 0 ? +n + 65536 : +n)).replace(/\\[a-z]+-?\d* ?/gi, '').replace(/\\([\\{}])/g, '$1').replace(/[{}]/g, '').trim();
 async function officeText(f) {
   const e = ext(f.name);
   if (e === 'rtf') return rtfToText(await f.text());
