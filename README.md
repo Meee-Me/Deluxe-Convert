@@ -1,7 +1,5 @@
 # Deluxe Convert
 
-**Live:** https://deluxe-convert.netlify.app
-
 A private, browser-based file converter. Static site, no build step, no server. Files never leave the user's device.
 
 Typed output formats: after adding files, type a format (e.g. `pdf`, `mp3`) to apply it to every file that supports it.
@@ -25,13 +23,18 @@ Notes:
 - Video conversion runs in WebAssembly and is slow for large files. Very large files may run out of browser memory.
 - Libraries (jsDelivr / unpkg) load on demand the first time they are needed, so an internet connection is required.
 
-## Deploy: GitHub → Netlify
+## Deploy: GitHub → Cloudflare Pages
 
-1. Push this repository to GitHub.
-2. Go to [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project** → GitHub, and pick this repo.
-3. Leave Build command empty. Set Publish directory to `.` (already set in `netlify.toml`). Click **Deploy**.
+1. Push this repository to GitHub (already done if you're reading this).
+2. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**.
+3. Select this repository.
+4. Build settings:
+   - **Framework preset**: None
+   - **Build command**: (leave empty)
+   - **Build output directory**: `/` (or `.`)
+5. Click **Save and Deploy**.
 
-Every push to `main` redeploys automatically. (A `vercel.json` is also included if you prefer Vercel.)
+Every push to `main` redeploys automatically. Security headers are set via the `_headers` file.
 
 ## Run locally
 
