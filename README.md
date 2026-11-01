@@ -22,22 +22,13 @@ Notes:
 - Video conversion runs in WebAssembly and is slow for large files. Very large files may run out of browser memory.
 - Libraries (jsDelivr / unpkg) load on demand the first time they are needed, so an internet connection is required.
 
-## Deploy: GitHub → Vercel
+## Deploy: GitHub → Netlify
 
-1. Create a new empty repository on GitHub (e.g. `deluxe-convert`).
-2. In this folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/deluxe-convert.git
-   git push -u origin main
-   ```
-3. Go to [vercel.com/new](https://vercel.com/new), import the repository.
-4. Framework Preset: **Other**. Leave Build Command and Output Directory empty. Click **Deploy**.
+1. Push this repository to GitHub.
+2. Go to [app.netlify.com](https://app.netlify.com) → **Add new site → Import an existing project** → GitHub, and pick this repo.
+3. Leave Build command empty. Set Publish directory to `.` (already set in `netlify.toml`). Click **Deploy**.
 
-Every `git push` to `main` redeploys automatically.
+Every push to `main` redeploys automatically. (A `vercel.json` is also included if you prefer Vercel.)
 
 ## Run locally
 
