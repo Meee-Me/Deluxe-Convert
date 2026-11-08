@@ -808,20 +808,30 @@ $('typeIn').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); appl
    makes a 60-second, one-use link ID. Convert trades it for a key that can only
    add files to that drive (POST /api/import), kept in this browser. */
 const drive = (() => {
-  const KEY = 'dc.drive', DEFAULT = 'https://deluxe-drive.deluxelordd.workers.dev';
+  const KEY = 'dc.drive', DEFAULT = 'https://deluxe-drive-xi.vercel.app';
   const MAX = 100 * 1024 * 1024;
-  // Only a Deluxe Drive server may receive files: the default one, another
-  // *.deluxelordd.workers.dev copy, or a local test server.
+  // Only a Deluxe Drive server may receive files: the one on Vercel (or one of
+  // its own deployment addresses), a *.deluxelordd.workers.dev copy, or a
+  // local test server.
   function serverOk(value) {
     try {
       const u = new URL(value);
       const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname);
-      if (u.protocol === 'https:' && (u.hostname === new URL(DEFAULT).hostname || /\.deluxelordd\.workers\.dev$/.test(u.hostname))) return u.origin;
+      const ours = u.hostname === new URL(DEFAULT).hostname || /^deluxe-drive-[a-z0-9-]+-deluxe12\.vercel\.app$/.test(u.hostname) || /\.deluxelordd\.workers\.dev$/.test(u.hostname);
+      if (u.protocol === 'https:' && ours) return u.origin;
       if (local && (u.protocol === 'http:' || u.protocol === 'https:')) return u.origin;
     } catch (_) {}
     return null;
   }
-  let conn = null;
+  let conn = null, limits = null;
+  // How much one request may carry: a Vercel Function takes about 4.5 MB, so
+  // a bigger file is sent in pieces of the size the drive names.
+  async function getLimits() {
+    if (limits && limits.server === conn.server) return limits;
+    try { const r = await fetch(conn.server + '/api/health', { cache: 'no-store' }); const d = await r.json(); limits = { server: conn.server, ...(d.limits || {}) }; }
+    catch (_) { limits = { server: conn.server }; }
+    return limits;
+  }
   try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (raw && raw.token && serverOk(raw.server) && (!raw.expiresAt || raw.expiresAt > Date.now())) conn = raw; } catch (_) {}
   const save = () => { try { conn ? localStorage.setItem(KEY, JSON.stringify(conn)) : localStorage.removeItem(KEY); } catch (_) {} };
   const listeners = new Set();
@@ -870,7 +880,20 @@ const drive = (() => {
       if (!conn) throw new Error('Connect Deluxe Drive first.');
       if (blob.size > MAX) throw new Error('Deluxe Drive takes files up to ' + fmtBytes(MAX) + '.');
       if (!blob.size) throw new Error('This file is empty.');
-      return ask('/api/import' + (share ? '?share=1' : ''), { method: 'POST', body: blob, headers: { 'Content-Type': (blob.type || 'application/octet-stream').split(';')[0], 'X-Deluxe-Name': encodeURIComponent(name) } });
+      const type = (blob.type || 'application/octet-stream').split(';')[0];
+      const headers = { 'Content-Type': type, 'X-Deluxe-Name': encodeURIComponent(name) };
+      const lim = await getLimits(), part = Number(lim.partBytes) || 0, most = Number(lim.requestBytes) || 0;
+      if (part > 0 && most > 0 && blob.size > most) {
+        let upload = '', result = null;
+        for (let offset = 0; offset < blob.size; offset += part) {
+          const last = offset + part >= blob.size;
+          const qs = 'offset=' + offset + (upload ? '&upload=' + encodeURIComponent(upload) : '') + (last ? '&last=1' + (share ? '&share=1' : '') : '');
+          result = await ask('/api/import?' + qs, { method: 'POST', body: blob.slice(offset, offset + part, type), headers });
+          if (!last) upload = result.upload;
+        }
+        return result;
+      }
+      return ask('/api/import' + (share ? '?share=1' : ''), { method: 'POST', body: blob, headers });
     }
   };
 })();

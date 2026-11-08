@@ -41,6 +41,9 @@ Connecting works the same way as Deluxe Docs:
    On another device, tap **Connect Deluxe Drive** at the top of Convert and type the code.
    The code works once, for 60 seconds.
 
+The drive is https://deluxe-drive-xi.vercel.app (its server is a Vercel Function there). Files bigger
+than 4 MB are sent in pieces, because a Vercel Function takes about 4.5 MB per request.
+
 Convert gets a key that can **only add files** to that drive. It cannot list, open, change or delete
 anything else. The key lasts 30 days and is kept in this browser; **Disconnect** in the Deluxe Drive
 dialog ends it. Files are only uploaded when you choose to share one. A file can be up to 100 MB.
