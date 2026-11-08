@@ -34,6 +34,10 @@ Every converted file has **Share to Deluxe Drive** and **Share…** next to Down
   Telegram shortcuts), **send it with another app** (the device's share sheet, where the browser
   supports sharing files), or download it.
 
+- **Open in Deluxe Docs** (in the share panel) saves the file to Deluxe Drive and opens it in Deluxe Docs.
+- From Deluxe Drive, a file's menu has **Convert with Deluxe Convert**: Convert opens with that file
+  already added (it reads the file's share link, `?url=…&name=…`).
+
 Connecting works the same way as Deluxe Docs:
 
 1. In Deluxe Drive, open the account menu (your avatar) → **Connect Deluxe Convert**.

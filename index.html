@@ -201,6 +201,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  <div class="opts">
   <button class="opt" type="button" id="shDrive"><span class="oi">☁</span><span><b>Share to Deluxe Drive</b><small id="shDriveSub">Adds it to your drive's Deluxe Convert folder</small></span></button>
   <button class="opt" type="button" id="shLink"><span class="oi">🔗</span><span><b>Copy a share link</b><small>Saves it to Deluxe Drive and copies a link anyone can open</small></span></button>
+  <button class="opt" type="button" id="shDocs"><span class="oi">📄</span><span><b>Open in Deluxe Docs</b><small>Saves it to Deluxe Drive and opens it in Deluxe Docs</small></span></button>
   <button class="opt" type="button" id="shApp" hidden><span class="oi">↗</span><span><b>Send with another app</b><small>Mail, messages, nearby devices and more</small></span></button>
   <a class="opt" id="shDl"><span class="oi">⬇</span><span><b>Download</b><small id="shDlSub"></small></span></a>
  </div>
@@ -838,8 +839,13 @@ const drive = (() => {
   const changed = () => { save(); listeners.forEach(fn => fn()); };
   async function ask(path, opts = {}) {
     let res;
-    try { res = await fetch(conn.server + path, { ...opts, headers: { Authorization: 'Bearer ' + conn.token, ...(opts.headers || {}) }, cache: 'no-store' }); }
-    catch (_) { throw new Error('Deluxe Drive could not be reached. Check your connection.'); }
+    // 503 + Retry-After: two changes met at once on the drive; send it again.
+    for (let attempt = 0; ; attempt++) {
+      try { res = await fetch(conn.server + path, { ...opts, headers: { Authorization: 'Bearer ' + conn.token, ...(opts.headers || {}) }, cache: 'no-store' }); }
+      catch (_) { throw new Error('Deluxe Drive could not be reached. Check your connection.'); }
+      if (res.status !== 503 || !res.headers.get('retry-after') || attempt >= 2) break;
+      await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+    }
     const data = await res.json().catch(() => ({}));
     if (res.status === 401) { conn = null; changed(); throw Object.assign(new Error('Deluxe Drive disconnected this app. Connect it again.'), { code: 'unauthorized' }); }
     if (!res.ok) throw new Error(data.error || 'Deluxe Drive answered ' + res.status + '.');
@@ -873,6 +879,11 @@ const drive = (() => {
     async disconnect() {
       const was = conn; conn = null; changed();
       if (was) { try { await fetch(was.server + '/api/link/session', { method: 'DELETE', headers: { Authorization: 'Bearer ' + was.token } }); } catch (_) {} }
+    },
+    // A share link for a file this app already added (no second upload).
+    async linkFor(fileId) {
+      if (!conn) throw new Error('Connect Deluxe Drive first.');
+      return ask('/api/import/' + encodeURIComponent(fileId) + '/share', { method: 'POST' });
     },
     // Adds a file to the drive's "Deluxe Convert" folder. With share, the drive
     // also makes a link anyone can open.
@@ -958,8 +969,20 @@ async function shareToDrive(it, opts = {}) {
   if (!it.result) return null;
   if (!drive.connected) { openDriveDialog(() => opts.fromPanel ? openShare(it) : shareToDrive(it, opts)); return null; }
   if (it.drive.state === 'saved' && (!opts.share || it.drive.share)) return it.drive;
+  const already = it.drive.state === 'saved' && it.drive.file;
   it.drive.state = 'saving'; it.drive.error = ''; render(); paintShare();
   try {
+    if (already) {
+      // Already in the drive: only a link is needed, not another copy.
+      try {
+        const l = await drive.linkFor(it.drive.file.id);
+        Object.assign(it.drive, { state: 'saved', share: l.share });
+        return it.drive;
+      } catch (e) {
+        if (e.code === 'unauthorized') throw e;
+        /* removed from the drive meanwhile: add it again below */
+      }
+    }
     const r = await drive.add(it.result.blob, it.result.name, !!opts.share);
     Object.assign(it.drive, { state: 'saved', file: r.file, share: r.share || it.drive.share });
     if (!opts.quiet) toast('“' + r.file.name + '” is in Deluxe Drive › ' + (r.folder || 'Deluxe Convert'));
@@ -992,6 +1015,7 @@ function paintShare() {
   $('shDrive').disabled = busy || d.state === 'saved';
   $('shDriveSub').textContent = busy ? 'Sharing…' : d.state === 'saved' ? 'Done: it is in your Deluxe Convert folder' : drive.connected ? 'Adds it to ' + drive.user.name + "'s drive, in the Deluxe Convert folder" : 'Connect Deluxe Drive (one link ID) and add it there';
   $('shLink').disabled = busy;
+  $('shDocs').disabled = busy;
   $('shDl').href = it.url; $('shDl').download = it.result.name; $('shDlSub').textContent = 'Save ' + it.result.name + ' to this device';
   const msg = $('shMsg');
   msg.className = 'msg' + (d.state === 'error' ? ' err' : ''); msg.textContent = d.state === 'error' ? d.error : '';
@@ -1023,6 +1047,24 @@ $('shLink').onclick = async () => {
   if (d && d.share) { const ok = await copyText(d.share.url); toast(ok ? 'Share link copied' : 'Share link ready: copy it below'); }
   else if (it.drive.state === 'error') toast(it.drive.error);
 };
+const DOCS_URL = 'https://deluxe-docs-iota.vercel.app';
+$('shDocs').onclick = async () => {
+  const it = shareItem; if (!it) return;
+  if (!drive.connected) { openDriveDialog(() => openShare(it)); return; }
+  // The tab opens now, inside the click, so the browser does not block it.
+  const tab = window.open('about:blank', '_blank');
+  const d = await shareToDrive(it, { share: true, quiet: true });
+  if (d && d.share) {
+    const target = new URL(DOCS_URL + '/');
+    target.searchParams.set('url', d.share.url);
+    target.searchParams.set('name', it.result.name);
+    if (tab) tab.location.href = target.toString(); else location.href = target.toString();
+    toast('Opening “' + it.result.name + '” in Deluxe Docs');
+  } else {
+    if (tab) tab.close();
+    toast(it.drive.error || 'Deluxe Docs could not be opened');
+  }
+};
 $('shCopy').onclick = async () => { toast((await copyText($('shUrl').value)) ? 'Share link copied' : 'Select the link and copy it'); };
 $('shApp').onclick = async () => {
   const it = shareItem; if (!it) return;
@@ -1041,6 +1083,27 @@ $('shApp').onclick = async () => {
   if (server && !drive.serverOk(server)) { $('linkMsg').className = 'msg err'; $('linkMsg').textContent = 'That link pointed at an unknown server, so it was not used.'; return; }
   $('linkIn').value = code;
   connectWith(code, server || undefined);
+})();
+/* a file handed over from Deluxe Drive (Convert with Deluxe Convert):
+   …/?url=<the file's share link>&name=report.pdf */
+(async function takeFileFromAddress() {
+  const q = new URLSearchParams(location.search);
+  const src = q.get('url');
+  if (!src) return;
+  history.replaceState(null, '', location.pathname + location.hash);
+  // Only a Deluxe Drive server is read from, never any other site.
+  let u = null; try { u = new URL(src); } catch (_) {}
+  if (!u || !drive.serverOk(u.origin) || !/^\/s\/[0-9a-f]+$/i.test(u.pathname)) { toast('That link is not a Deluxe Drive file.'); return; }
+  const name = (q.get('name') || 'file').replace(/[\\/]/g, '_').slice(0, 200) || 'file';
+  toast('Getting “' + name + '” from Deluxe Drive…');
+  try {
+    const res = await fetch(u.toString(), { cache: 'no-store' });
+    if (!res.ok) throw new Error();
+    const blob = await res.blob();
+    addFiles([new File([blob], name, { type: (blob.type || '').split(';')[0] })]);
+    toast('“' + name + '” is ready. Pick a format and convert.');
+    const row = $('list').lastElementChild; if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (_) { toast('“' + name + '” could not be read from Deluxe Drive. Its share link may have been stopped.'); }
 })();
 paintDrive();
 drive.check();
