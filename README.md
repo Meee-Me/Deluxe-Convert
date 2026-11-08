@@ -23,6 +23,28 @@ Notes:
 - Video conversion runs in WebAssembly and is slow for large files. Very large files may run out of browser memory.
 - Libraries (jsDelivr / unpkg) load on demand the first time they are needed, so an internet connection is required.
 
+## Sharing and Deluxe Drive
+
+Every converted file has **Share to Deluxe Drive** and **Share…** next to Download.
+
+- **Share to Deluxe Drive** adds the file to a **Deluxe Convert** folder in your Deluxe Drive.
+  **Share all to Deluxe Drive** does it for every converted file.
+- **Share…** opens the share panel. From there you can share to Deluxe Drive, **copy a share link**
+  (the file is saved to Deluxe Drive and you get a link anyone can open, with Email, WhatsApp and
+  Telegram shortcuts), **send it with another app** (the device's share sheet, where the browser
+  supports sharing files), or download it.
+
+Connecting works the same way as Deluxe Docs:
+
+1. In Deluxe Drive, open the account menu (your avatar) → **Connect Deluxe Convert**.
+2. Tap **Generate link ID**, then **Open Deluxe Convert**. Convert connects by itself.
+   On another device, tap **Connect Deluxe Drive** at the top of Convert and type the code.
+   The code works once, for 60 seconds.
+
+Convert gets a key that can **only add files** to that drive. It cannot list, open, change or delete
+anything else. The key lasts 30 days and is kept in this browser; **Disconnect** in the Deluxe Drive
+dialog ends it. Files are only uploaded when you choose to share one. A file can be up to 100 MB.
+
 ## Deploy: GitHub → Cloudflare Pages
 
 1. Push this repository to GitHub (already done if you're reading this).

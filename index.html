@@ -48,20 +48,20 @@ body{margin:0;background:radial-gradient(ellipse at 15% 0%,#20204b 0,transparent
 .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .2s}
 .rctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:13px;outline:none;max-width:150px}
-.btn{border:0;border-radius:10px;padding:10px 14px;font:700 13px inherit;cursor:pointer;transition:.2s;color:#fff;background:linear-gradient(100deg,#7557f5,#318edb);text-decoration:none;display:inline-block}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer;transition:.2s;color:#fff;background:linear-gradient(100deg,#7557f5,#318edb);text-decoration:none;display:inline-block}
 .btn:hover{filter:brightness(1.12)}.btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.ghost{background:#202b40;color:#c6d2e6}.btn.dl{background:linear-gradient(100deg,#1f9d76,#28b7a1)}
 .x{border:0;background:transparent;color:#9aabc4;font-size:22px;cursor:pointer;line-height:1}
 .actions{display:none;gap:10px;margin-top:18px;flex-wrap:wrap}
 .actions .btn{padding:13px 18px;font-size:14px}.actions .main{flex:1;min-width:180px}
 .note{color:var(--muted);font-size:12px;text-align:center;margin:17px 0 0}
-.features{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:22px}
 .feature{border:1px solid var(--line);border-radius:16px;padding:17px;background:#101a2a99}
 .feature b{display:block;margin:7px 0 3px}.feature p{font-size:12px;color:var(--muted);margin:0}.ficon{font-size:21px}
 .footer{text-align:center;color:#70819c;font-size:12px;margin-top:30px}
 .visit{color:#6ce5ed;text-decoration:underline;text-underline-offset:3px;font-size:13px;display:inline-block;margin-top:8px}
 .visit:hover{color:#fff}
-.creditsbtn{margin-top:10px;border:1px solid var(--line);background:#101a2a99;color:#b9c6df;border-radius:30px;padding:8px 18px;font:700 12px inherit;letter-spacing:1px;cursor:pointer;transition:.2s}
+.creditsbtn{margin-top:10px;border:1px solid var(--line);background:#101a2a99;color:#b9c6df;border-radius:30px;padding:8px 18px;font-weight:700;font-size:12px;font-family:inherit;letter-spacing:1px;cursor:pointer;transition:.2s}
 .creditsbtn:hover{border-color:var(--cyan);color:#fff}
 .credits{display:none;position:fixed;inset:0;z-index:100;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,#20204b 0,transparent 60%),#05070f}
 .credits.open{display:block}
@@ -77,16 +77,60 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 .roll .role{color:#9e8dff;font-size:13px;letter-spacing:3px;font-weight:800;text-transform:uppercase;margin:0 0 10px}
 .roll .name{font-size:clamp(24px,6vw,38px);font-weight:800;margin:0 0 70px}
 .roll .thanks{color:var(--muted);margin:0 0 40px}
+/* Deluxe Drive connection, share panel, toast */
+.topr{display:flex;align-items:center;gap:10px}
+.drivebtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#101a2acc;color:#dbe5f5;border-radius:30px;padding:8px 14px;font-weight:700;font-size:12px;font-family:inherit;cursor:pointer;transition:.2s;max-width:240px}
+.drivebtn:hover,.drivebtn:focus-visible{border-color:var(--cyan);color:#fff;outline:none}
+.drivebtn .dot{width:8px;height:8px;border-radius:50%;background:#5d6b84;flex:none}
+.drivebtn.on .dot{background:var(--good);box-shadow:0 0 0 3px #49d6a033}
+.drivebtn span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn.drive{background:linear-gradient(100deg,#2f6fe0,#35b5e8)}
+.btn.saved{background:#173a33;color:#8ff0cb}
+.btn.sm{padding:9px 12px}
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:16px;background:#03060ccc;backdrop-filter:blur(4px)}
+.modal.open{display:flex}
+.sheet{width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow:auto;background:linear-gradient(145deg,#141e30,#0f1726);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 30px 90px #000a;position:relative}
+.sheet h2{margin:0 34px 6px 0;font-size:20px;letter-spacing:-.4px}
+.sheet .sx{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#0b1322;color:#c6d2e6;font-size:22px;line-height:1;cursor:pointer}
+.sheet .sx:hover{border-color:var(--cyan);color:#fff}
+.sheet p{color:var(--muted);font-size:13px;margin:6px 0 12px}
+.sheet ol{margin:0 0 14px;padding-left:20px;color:#c6d2e6;font-size:13px}
+.sheet ol li{margin:4px 0}
+.sheet b{color:var(--text)}
+.field{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.field input{flex:1;min-width:0;background:#0b1322;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;outline:none}
+.field input:focus{border-color:var(--cyan)}
+.field input.code{font:700 17px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:2px;text-transform:uppercase}
+.msg{font-size:13px;margin:8px 0 0;min-height:18px}
+.msg.err{color:var(--bad)}.msg.ok{color:var(--good)}
+.who{display:flex;align-items:center;gap:12px;background:#0c1525;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0 14px}
+.who .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--cyan));display:grid;place-items:center;font-weight:800;flex:none}
+.who small{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.sheet .row2{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.sheet .row2 .btn{flex:1;min-width:130px;text-align:center}
+.opts{display:grid;gap:8px;margin-top:12px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:#0c1525;color:var(--text);border-radius:14px;padding:12px 14px;font:inherit;cursor:pointer;text-decoration:none;transition:.2s}
+.opt:hover:not(:disabled),.opt:focus-visible{border-color:var(--cyan);outline:none}
+.opt:disabled{opacity:.5;cursor:not-allowed}
+.opt .oi{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#1c2742;font-size:17px;flex:none}
+.opt b{display:block;font-size:14px}.opt small{display:block;color:var(--muted);font-size:12px}
+.linkbox{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.linkbox[hidden]{display:none}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.quick a{font-size:12px;color:#6ce5ed;text-decoration:underline;text-underline-offset:3px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:120;background:#1a2540;border:1px solid var(--line);color:var(--text);padding:11px 16px;border-radius:12px;font-size:13px;box-shadow:0 12px 40px #0008;transition:.25s;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(prefers-reduced-motion:reduce){.credits{overflow:auto}.roll{position:static;animation:none;padding:90px 24px 60px}.credits::before{animation:none}}
+@media(max-width:900px){.features{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){
- .wrap{padding:18px 14px 35px}.top{margin-bottom:30px}.card{padding:15px}.features{grid-template-columns:1fr}.badge{display:none}
- .row{grid-template-columns:38px 1fr}.rctl{grid-column:1/-1;justify-content:stretch}.rctl select{flex:1;max-width:none}
+ .wrap{padding:18px 16px 35px}.top{margin-bottom:30px;gap:10px}.drivebtn{max-width:170px}.brand{font-size:16px}.card{padding:15px}.features{grid-template-columns:1fr}.badge{display:none}
+ .row{grid-template-columns:38px 1fr}.rctl{grid-column:1/-1;justify-content:stretch}.rctl select{flex:1 1 100%;max-width:none}.rctl .btn{flex:1;text-align:center;white-space:nowrap}.rctl .btn.drive,.rctl .btn.saved{flex:1 1 100%}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h13l-4-4M19 15H6l4 4"/></svg></div>DELUXE CONVERT</div><div class="badge">PRIVATE · BROWSER-BASED CONVERSION</div></header>
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h13l-4-4M19 15H6l4 4"/></svg></div>DELUXE CONVERT</div><div class="topr"><div class="badge">PRIVATE · BROWSER-BASED CONVERSION</div><button class="drivebtn" id="driveBtn" type="button" aria-haspopup="dialog"><span class="dot"></span><span id="driveLabel">Connect Deluxe Drive</span></button></div></header>
 
 <section class="hero"><div class="eyebrow">One tool. Many formats.</div><h1>Convert files <span>effortlessly.</span></h1><p>Images, PDFs, Word, spreadsheets, data, audio and video. Convert several files at once, right in your browser.</p></section>
 
@@ -110,18 +154,64 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 <div class="actions" id="actions">
  <button class="btn main" id="convertAll">Convert all ↗</button>
  <button class="btn ghost" id="zipAll" disabled>Download all (ZIP)</button>
+ <button class="btn drive" id="driveAll" disabled>Share all to Deluxe Drive</button>
  <button class="btn ghost" id="clear">Clear</button>
 </div>
-<p class="note">Everything runs on your device. Files are never uploaded. Audio and video use a larger engine that loads the first time you need it.</p>
+<p class="note">Everything runs on your device. Files are never uploaded unless you choose <b>Share to Deluxe Drive</b>. Audio and video use a larger engine that loads the first time you need it.</p>
 </main>
 
 <section class="features">
  <div class="feature"><div class="ficon">⚡</div><b>Batch conversion</b><p>Add many files, pick a format for each, convert them all in one go.</p></div>
- <div class="feature"><div class="ficon">🔒</div><b>Privacy first</b><p>No uploads, no accounts. Your files stay in your browser.</p></div>
+ <div class="feature"><div class="ficon">🔒</div><b>Privacy first</b><p>No uploads, no accounts. Your files stay in your browser until you share one to Deluxe Drive.</p></div>
  <div class="feature"><div class="ficon">✦</div><b>Wide format support</b><p>From PNG to PDF, XLSX to JSON, MOV to MP4 and more.</p></div>
+ <div class="feature"><div class="ficon">↗</div><b>Share anywhere</b><p>Send a converted file to another app, or put it in Deluxe Drive and copy a link anyone can open.</p></div>
 </section>
 <div class="footer">DELUXE CONVERT · Built for everyday file conversions<br><a class="visit" href="https://youtube-guide-ai.netlify.app" target="_blank" rel="noopener noreferrer">Visit other web pages by DeluxeLord ↗</a><br><button class="creditsbtn" id="creditsBtn">▶ Credits</button></div>
 </div>
+
+<div class="modal" id="driveModal"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="driveTitle">
+ <button class="sx" type="button" data-close aria-label="Close">×</button>
+ <h2 id="driveTitle">Connect Deluxe Drive</h2>
+ <div id="driveOff">
+  <p>Connect once, then every converted file can be shared straight into your Deluxe Drive.</p>
+  <ol>
+   <li>Open <b>Deluxe Drive</b> and sign in.</li>
+   <li>Tap your avatar (account menu) → <b>Connect Deluxe Convert</b>.</li>
+   <li>Tap <b>Generate link ID</b>, then <b>Open Deluxe Convert</b>. That's it.</li>
+  </ol>
+  <p>On another device? Type the code it shows here (it works once, for 60 seconds):</p>
+  <form class="field" id="linkForm" autocomplete="off">
+   <input class="code" id="linkIn" placeholder="XXXX-XXXX-XXXX" maxlength="20" autocapitalize="characters" spellcheck="false" aria-label="Link ID">
+   <button class="btn" id="linkGo" type="submit">Connect</button>
+  </form>
+  <p class="msg" id="linkMsg" aria-live="polite"></p>
+  <div class="row2"><a class="btn ghost" id="driveOpen1" target="_blank" rel="noopener noreferrer">Open Deluxe Drive ↗</a></div>
+ </div>
+ <div id="driveOn" hidden>
+  <div class="who"><div class="av" id="driveAv">D</div><div><b id="driveName"></b><small id="driveWhere"></small></div></div>
+  <p>Files you share land in the <b>Deluxe Convert</b> folder of this drive. Deluxe Convert can only add files there: it cannot see or change anything else in your drive.</p>
+  <div class="row2"><a class="btn" id="driveOpen2" target="_blank" rel="noopener noreferrer">Open Deluxe Drive ↗</a><button class="btn ghost" id="driveOff2" type="button">Disconnect</button></div>
+ </div>
+</div></div>
+
+<div class="modal" id="shareModal"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+ <button class="sx" type="button" data-close aria-label="Close">×</button>
+ <h2 id="shareTitle">Share</h2>
+ <p id="shareFile"></p>
+ <div class="opts">
+  <button class="opt" type="button" id="shDrive"><span class="oi">☁</span><span><b>Share to Deluxe Drive</b><small id="shDriveSub">Adds it to your drive's Deluxe Convert folder</small></span></button>
+  <button class="opt" type="button" id="shLink"><span class="oi">🔗</span><span><b>Copy a share link</b><small>Saves it to Deluxe Drive and copies a link anyone can open</small></span></button>
+  <button class="opt" type="button" id="shApp" hidden><span class="oi">↗</span><span><b>Send with another app</b><small>Mail, messages, nearby devices and more</small></span></button>
+  <a class="opt" id="shDl"><span class="oi">⬇</span><span><b>Download</b><small id="shDlSub"></small></span></a>
+ </div>
+ <p class="msg" id="shMsg" aria-live="polite"></p>
+ <div class="linkbox" id="shBox" hidden>
+  <div class="field"><input id="shUrl" readonly aria-label="Share link"><button class="btn" type="button" id="shCopy">Copy</button></div>
+  <div class="quick"><a id="shMail" target="_blank" rel="noopener noreferrer">Email</a><a id="shWa" target="_blank" rel="noopener noreferrer">WhatsApp</a><a id="shTg" target="_blank" rel="noopener noreferrer">Telegram</a><a id="shOpen" target="_blank" rel="noopener noreferrer">Open link</a></div>
+ </div>
+</div></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="credits" id="credits" role="dialog" aria-modal="true" aria-label="Credits">
  <button class="cclose" id="cclose" aria-label="Close credits">×</button>
@@ -609,6 +699,9 @@ function render() {
   $('actions').style.display = items.length ? 'flex' : 'none';
   $('typed').style.display = items.length ? 'flex' : 'none';
   $('zipAll').disabled = !items.some(i => i.result);
+  const unsaved = items.filter(i => i.result && i.drive.state !== 'saved').length;
+  $('driveAll').disabled = !unsaved || items.some(i => i.drive.state === 'saving');
+  $('driveAll').textContent = unsaved > 1 ? 'Share all to Deluxe Drive (' + unsaved + ')' : 'Share to Deluxe Drive';
   $('convertAll').disabled = busy || !items.some(i => i.target && !i.result);
   $('list').replaceChildren(...items.map(rowEl));
 }
@@ -617,8 +710,8 @@ function rowEl(it) {
   row.appendChild(mk('div', 'fileicon', ext(it.file.name).slice(0, 4) || '?'));
   const meta = mk('div', 'meta');
   meta.appendChild(mk('div', 'fname', it.file.name));
-  const sub = mk('div', 'fsub' + (it.state === 'done' ? ' ok' : (it.state === 'error' || (it.state === 'idle' && it.note)) ? ' err' : ''),
-    it.state === 'idle' && it.note ? it.note : it.state === 'done' ? 'Done · ' + fmtBytes(it.result.blob.size) : it.state === 'error' ? it.error : it.state === 'working' ? 'Converting… ' + Math.round(it.pct * 100) + '%' : fmtBytes(it.file.size) + ' · ' + (it.kind === 'other' ? 'Other file' : it.kind));
+  const sub = mk('div', 'fsub' + (it.state === 'done' ? (it.drive.state === 'error' ? ' err' : ' ok') : (it.state === 'error' || (it.state === 'idle' && it.note)) ? ' err' : ''),
+    it.state === 'idle' && it.note ? it.note : it.state === 'done' ? 'Done · ' + fmtBytes(it.result.blob.size) + (it.result.name !== baseName(it.file.name) + '.' + it.target ? ' · ' + it.result.name : '') + (it.drive.state === 'saved' ? ' · saved to Deluxe Drive' : it.drive.state === 'error' ? ' · ' + it.drive.error : '') : it.state === 'error' ? it.error : it.state === 'working' ? 'Converting… ' + Math.round(it.pct * 100) + '%' : fmtBytes(it.file.size) + ' · ' + (it.kind === 'other' ? 'Other file' : it.kind));
   meta.appendChild(sub);
   const bar = mk('div', 'bar'), fill = document.createElement('i'); fill.style.width = Math.round(it.pct * 100) + '%'; bar.appendChild(fill);
   if (it.state === 'working') bar.style.display = 'block';
@@ -630,10 +723,17 @@ function rowEl(it) {
   sel.appendChild(new Option('Convert to…', ''));
   it.targets.forEach(t => sel.add(new Option(LABEL[t] || t.toUpperCase(), t)));
   sel.value = it.target; sel.disabled = busy;
-  sel.onchange = () => { it.target = sel.value; it.result = null; it.state = 'idle'; it.note = ''; render(); };
+  sel.onchange = () => { if (it.url) URL.revokeObjectURL(it.url); it.url = null; it.target = sel.value; it.result = null; it.drive = newDrive(); it.state = 'idle'; it.note = ''; render(); };
   ctl.appendChild(sel);
   if (it.state === 'done') {
     const a = mk('a', 'btn dl', 'Download'); a.href = it.url; a.download = it.result.name; ctl.appendChild(a);
+    const d = it.drive, dv = mk('button', 'btn ' + (d.state === 'saved' ? 'saved' : 'drive'),
+      d.state === 'saving' ? 'Sharing…' : d.state === 'saved' ? '✓ In Deluxe Drive' : 'Share to Deluxe Drive');
+    dv.disabled = d.state === 'saving';
+    dv.title = d.state === 'saved' ? 'Open Deluxe Drive' : 'Add this file to your Deluxe Drive';
+    dv.onclick = () => d.state === 'saved' ? window.open(drive.openUrl(), '_blank', 'noopener') : shareToDrive(it);
+    ctl.appendChild(dv);
+    const sh = mk('button', 'btn ghost', 'Share…'); sh.onclick = () => openShare(it); ctl.appendChild(sh);
   } else {
     const b = mk('button', 'btn', 'Convert'); b.disabled = busy || !it.target; b.onclick = () => run([it]); ctl.appendChild(b);
   }
@@ -646,7 +746,7 @@ function rowEl(it) {
 function addFiles(list) {
   for (const f of list) {
     const kind = kindOf(f), targets = targetsFor(f, kind);
-    items.push({ id: ++uid, file: f, kind, targets, target: targets.length === 1 ? targets[0] : '', state: 'idle', pct: 0, result: null, url: null, error: '', note: '' });
+    items.push({ id: ++uid, file: f, kind, targets, target: targets.length === 1 ? targets[0] : '', state: 'idle', pct: 0, result: null, url: null, error: '', note: '', drive: newDrive() });
   }
   render();
 }
@@ -694,7 +794,7 @@ function applyTyped() {
   v = ALIAS[v] || v;
   items.forEach(it => {
     if (it.state === 'working') return;
-    if (it.targets.includes(v)) { if (it.target !== v) { it.target = v; it.result = null; it.state = 'idle'; } it.note = ''; }
+    if (it.targets.includes(v)) { if (it.target !== v) { if (it.url) URL.revokeObjectURL(it.url); it.url = null; it.target = v; it.result = null; it.drive = newDrive(); it.state = 'idle'; } it.note = ''; }
     else it.note = "Can't convert this file to " + v.toUpperCase() + '. Pick one from the list.';
   });
   render();
@@ -703,12 +803,236 @@ $('typeGo').onclick = applyTyped;
 $('typeIn').onchange = applyTyped;
 $('typeIn').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); applyTyped(); } };
 
+/* ---------- Deluxe Drive connection ----------
+   Same steps as Deluxe Docs: Deluxe Drive (account menu → Connect Deluxe Convert)
+   makes a 60-second, one-use link ID. Convert trades it for a key that can only
+   add files to that drive (POST /api/import), kept in this browser. */
+const drive = (() => {
+  const KEY = 'dc.drive', DEFAULT = 'https://deluxe-drive.deluxelordd.workers.dev';
+  const MAX = 100 * 1024 * 1024;
+  // Only a Deluxe Drive server may receive files: the default one, another
+  // *.deluxelordd.workers.dev copy, or a local test server.
+  function serverOk(value) {
+    try {
+      const u = new URL(value);
+      const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname);
+      if (u.protocol === 'https:' && (u.hostname === new URL(DEFAULT).hostname || /\.deluxelordd\.workers\.dev$/.test(u.hostname))) return u.origin;
+      if (local && (u.protocol === 'http:' || u.protocol === 'https:')) return u.origin;
+    } catch (_) {}
+    return null;
+  }
+  let conn = null;
+  try { const raw = JSON.parse(localStorage.getItem(KEY) || 'null'); if (raw && raw.token && serverOk(raw.server) && (!raw.expiresAt || raw.expiresAt > Date.now())) conn = raw; } catch (_) {}
+  const save = () => { try { conn ? localStorage.setItem(KEY, JSON.stringify(conn)) : localStorage.removeItem(KEY); } catch (_) {} };
+  const listeners = new Set();
+  const changed = () => { save(); listeners.forEach(fn => fn()); };
+  async function ask(path, opts = {}) {
+    let res;
+    try { res = await fetch(conn.server + path, { ...opts, headers: { Authorization: 'Bearer ' + conn.token, ...(opts.headers || {}) }, cache: 'no-store' }); }
+    catch (_) { throw new Error('Deluxe Drive could not be reached. Check your connection.'); }
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 401) { conn = null; changed(); throw Object.assign(new Error('Deluxe Drive disconnected this app. Connect it again.'), { code: 'unauthorized' }); }
+    if (!res.ok) throw new Error(data.error || 'Deluxe Drive answered ' + res.status + '.');
+    return data;
+  }
+  return {
+    get connected() { return !!conn; },
+    get user() { return conn && conn.user; },
+    get server() { return conn ? conn.server : DEFAULT; },
+    openUrl() { return (conn ? conn.server : DEFAULT) + '/'; },
+    serverOk,
+    onChange(fn) { listeners.add(fn); },
+    async connect(linkId, server) {
+      const base = serverOk(server || DEFAULT);
+      if (!base) throw new Error('That is not a Deluxe Drive address.');
+      const clean = String(linkId || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (clean.length !== 12) throw new Error('A link ID has 12 letters and digits, like ABCD-EFGH-JKLM.');
+      let res;
+      try { res = await fetch(base + '/api/link/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ linkId: clean, app: 'deluxe-convert' }), cache: 'no-store' }); }
+      catch (_) { throw new Error('Deluxe Drive could not be reached. Check your connection and try again.'); }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.token) throw new Error(data.error || 'That link ID did not work. In Deluxe Drive, tap Generate link ID again.');
+      conn = { server: base, token: data.token, user: { name: (data.user && data.user.name) || 'Deluxe Drive' }, expiresAt: Number(data.expiresIn) > 0 ? Date.now() + Number(data.expiresIn) * 1000 : 0 };
+      changed();
+      return conn.user;
+    },
+    async check() {
+      if (!conn) return;
+      try { const d = await ask('/api/auth/me'); if (d.user && d.user.name && d.user.name !== conn.user.name) { conn.user.name = d.user.name; changed(); } } catch (_) { /* offline: keep the key */ }
+    },
+    async disconnect() {
+      const was = conn; conn = null; changed();
+      if (was) { try { await fetch(was.server + '/api/link/session', { method: 'DELETE', headers: { Authorization: 'Bearer ' + was.token } }); } catch (_) {} }
+    },
+    // Adds a file to the drive's "Deluxe Convert" folder. With share, the drive
+    // also makes a link anyone can open.
+    async add(blob, name, share) {
+      if (!conn) throw new Error('Connect Deluxe Drive first.');
+      if (blob.size > MAX) throw new Error('Deluxe Drive takes files up to ' + fmtBytes(MAX) + '.');
+      if (!blob.size) throw new Error('This file is empty.');
+      return ask('/api/import' + (share ? '?share=1' : ''), { method: 'POST', body: blob, headers: { 'Content-Type': (blob.type || 'application/octet-stream').split(';')[0], 'X-Deluxe-Name': encodeURIComponent(name) } });
+    }
+  };
+})();
+const newDrive = () => ({ state: 'idle', error: '', file: null, share: null });
+
+let toastTimer = 0;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200); }
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+  const ta = mk('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (_) {} ta.remove(); return ok;
+}
+
+/* modals */
+let lastFocus = null;
+function openModal(id) { lastFocus = document.activeElement; $(id).classList.add('open'); document.body.style.overflow = 'hidden'; const f = $(id).querySelector('input:not([readonly]),button:not([data-close]):not(:disabled),a[href]'); if (f) setTimeout(() => f.focus(), 30); }
+function closeModal(id) { $(id).classList.remove('open'); if (!document.querySelector('.modal.open')) document.body.style.overflow = ''; if (lastFocus && lastFocus.focus) lastFocus.focus(); if (id === 'driveModal') pendingDrive = null; }
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModal(m.id); });
+});
+
+/* drive dialog */
+let pendingDrive = null; // what to do once connected (share a file, share all)
+function paintDrive() {
+  const on = drive.connected, name = on ? drive.user.name : '';
+  $('driveBtn').classList.toggle('on', on);
+  $('driveLabel').textContent = on ? 'Deluxe Drive · ' + name : 'Connect Deluxe Drive';
+  $('driveBtn').title = on ? 'Connected to ' + name + "'s Deluxe Drive" : 'Connect Deluxe Drive to share converted files there';
+  $('driveTitle').textContent = on ? 'Deluxe Drive' : 'Connect Deluxe Drive';
+  $('driveOff').hidden = on; $('driveOn').hidden = !on;
+  $('driveAv').textContent = (name.charAt(0) || 'D').toUpperCase();
+  $('driveName').textContent = name;
+  $('driveWhere').textContent = on ? 'Connected · ' + new URL(drive.server).host : '';
+  $('driveOpen1').href = $('driveOpen2').href = drive.openUrl();
+  render();
+}
+drive.onChange(paintDrive);
+function openDriveDialog(then) {
+  pendingDrive = then || null;
+  $('linkMsg').textContent = ''; $('linkMsg').className = 'msg';
+  $('linkIn').value = '';
+  openModal('driveModal');
+}
+async function connectWith(code, server) {
+  const msg = $('linkMsg'), go = $('linkGo');
+  msg.className = 'msg'; msg.textContent = 'Connecting…'; go.disabled = true;
+  try {
+    const user = await drive.connect(code, server);
+    msg.className = 'msg ok'; msg.textContent = 'Connected to ' + user.name + "'s Deluxe Drive.";
+    toast('Connected to ' + user.name + "'s Deluxe Drive");
+    const then = pendingDrive; pendingDrive = null;
+    if (then) { closeModal('driveModal'); then(); }
+  } catch (e) { msg.className = 'msg err'; msg.textContent = e.message; }
+  finally { go.disabled = false; }
+}
+$('driveBtn').onclick = () => openDriveDialog();
+$('linkForm').onsubmit = e => { e.preventDefault(); connectWith($('linkIn').value); };
+$('driveOff2').onclick = async () => { await drive.disconnect(); toast('Deluxe Drive disconnected'); };
+
+/* share to Deluxe Drive */
+async function shareToDrive(it, opts = {}) {
+  if (!it.result) return null;
+  if (!drive.connected) { openDriveDialog(() => opts.fromPanel ? openShare(it) : shareToDrive(it, opts)); return null; }
+  if (it.drive.state === 'saved' && (!opts.share || it.drive.share)) return it.drive;
+  it.drive.state = 'saving'; it.drive.error = ''; render(); paintShare();
+  try {
+    const r = await drive.add(it.result.blob, it.result.name, !!opts.share);
+    Object.assign(it.drive, { state: 'saved', file: r.file, share: r.share || it.drive.share });
+    if (!opts.quiet) toast('“' + r.file.name + '” is in Deluxe Drive › ' + (r.folder || 'Deluxe Convert'));
+    return it.drive;
+  } catch (e) {
+    it.drive.state = 'error'; it.drive.error = e.message;
+    if (!opts.quiet) toast(e.message);
+    if (e.code === 'unauthorized' && !opts.quiet) openDriveDialog(() => shareToDrive(it, opts));
+    return null;
+  } finally { render(); paintShare(); }
+}
+async function shareAllToDrive() {
+  if (!drive.connected) { openDriveDialog(shareAllToDrive); return; }
+  const list = items.filter(i => i.result && i.drive.state !== 'saved');
+  let ok = 0, bad = 0;
+  for (const it of list) { (await shareToDrive(it, { quiet: true })) ? ok++ : bad++; if (!drive.connected) break; }
+  if (!drive.connected) { toast('Deluxe Drive disconnected this app. Connect it again.'); openDriveDialog(shareAllToDrive); return; }
+  toast(bad ? ok + ' shared, ' + bad + ' failed. Try those again.' : (ok === 1 ? '1 file' : ok + ' files') + ' added to Deluxe Drive › Deluxe Convert');
+}
+$('driveAll').onclick = shareAllToDrive;
+
+/* the share panel */
+let shareItem = null;
+function paintShare() {
+  const it = shareItem;
+  if (!it || !it.result || !$('shareModal').classList.contains('open')) return;
+  const d = it.drive, busy = d.state === 'saving';
+  $('shareTitle').textContent = 'Share “' + it.result.name + '”';
+  $('shareFile').textContent = fmtBytes(it.result.blob.size) + ' · converted from ' + it.file.name;
+  $('shDrive').disabled = busy || d.state === 'saved';
+  $('shDriveSub').textContent = busy ? 'Sharing…' : d.state === 'saved' ? 'Done: it is in your Deluxe Convert folder' : drive.connected ? 'Adds it to ' + drive.user.name + "'s drive, in the Deluxe Convert folder" : 'Connect Deluxe Drive (one link ID) and add it there';
+  $('shLink').disabled = busy;
+  $('shDl').href = it.url; $('shDl').download = it.result.name; $('shDlSub').textContent = 'Save ' + it.result.name + ' to this device';
+  const msg = $('shMsg');
+  msg.className = 'msg' + (d.state === 'error' ? ' err' : ''); msg.textContent = d.state === 'error' ? d.error : '';
+  const url = d.share && d.share.url;
+  $('shBox').hidden = !url;
+  if (url) {
+    const text = it.result.name + ' — ' + url;
+    $('shUrl').value = url;
+    $('shMail').href = 'mailto:?subject=' + encodeURIComponent(it.result.name) + '&body=' + encodeURIComponent(text);
+    $('shWa').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+    $('shTg').href = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(it.result.name);
+    $('shOpen').href = url;
+  }
+}
+function shareFileObj(it) { return new File([it.result.blob], it.result.name, { type: (it.result.blob.type || 'application/octet-stream').split(';')[0] }); }
+function openShare(it) {
+  shareItem = it;
+  let canApp = false;
+  try { canApp = !!(navigator.canShare && navigator.canShare({ files: [shareFileObj(it)] })); } catch (_) {}
+  $('shApp').hidden = !canApp;
+  openModal('shareModal');
+  paintShare();
+}
+$('shDrive').onclick = () => shareItem && shareToDrive(shareItem, { fromPanel: true });
+$('shLink').onclick = async () => {
+  const it = shareItem; if (!it) return;
+  if (!drive.connected) { openDriveDialog(() => openShare(it)); return; }
+  const d = await shareToDrive(it, { share: true, quiet: true });
+  if (d && d.share) { const ok = await copyText(d.share.url); toast(ok ? 'Share link copied' : 'Share link ready: copy it below'); }
+  else if (it.drive.state === 'error') toast(it.drive.error);
+};
+$('shCopy').onclick = async () => { toast((await copyText($('shUrl').value)) ? 'Share link copied' : 'Select the link and copy it'); };
+$('shApp').onclick = async () => {
+  const it = shareItem; if (!it) return;
+  try { await navigator.share({ files: [shareFileObj(it)], title: it.result.name }); }
+  catch (e) { if (e && e.name !== 'AbortError') toast('This device could not share the file. Download it instead.'); }
+};
+
+/* a link ID handed over in the address: …/#link=ABCD-EFGH-JKLM&drive=https://… */
+(function takeLinkFromAddress() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const code = h.get('link');
+  if (!code) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  const server = h.get('drive');
+  openDriveDialog();
+  if (server && !drive.serverOk(server)) { $('linkMsg').className = 'msg err'; $('linkMsg').textContent = 'That link pointed at an unknown server, so it was not used.'; return; }
+  $('linkIn').value = code;
+  connectWith(code, server || undefined);
+})();
+paintDrive();
+drive.check();
+
 /* credits screen */
 function openCredits() { $('credits').classList.add('open'); document.body.style.overflow = 'hidden'; $('cclose').focus(); }
 function closeCredits() { $('credits').classList.remove('open'); document.body.style.overflow = ''; $('creditsBtn').focus(); }
 $('creditsBtn').onclick = openCredits;
 $('cclose').onclick = closeCredits;
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('credits').classList.contains('open')) closeCredits(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('credits').classList.contains('open')) closeCredits();
+  else if ($('shareModal').classList.contains('open')) closeModal('shareModal');
+  else if ($('driveModal').classList.contains('open')) closeModal('driveModal');
+});
 </script>
 </body>
 </html>
