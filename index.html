@@ -82,11 +82,13 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  .wrap{padding:18px 14px 35px}.top{margin-bottom:30px}.card{padding:15px}.features{grid-template-columns:1fr}.badge{display:none}
  .row{grid-template-columns:38px 1fr}.rctl{grid-column:1/-1;justify-content:stretch}.rctl select{flex:1;max-width:none}
 }
+.deluxe-account:empty{display:none}.deluxe-account{margin-left:auto}
+.recent-conv{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;font-size:14px;color:#aebbd1}.recent-conv b{display:block;color:var(--text);margin-bottom:6px}.recent-conv li{margin:3px 0;overflow-wrap:anywhere}.recent-conv ul{margin:0;padding-left:18px}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h13l-4-4M19 15H6l4 4"/></svg></div>DELUXE CONVERT</div><div class="badge">PRIVATE · BROWSER-BASED CONVERSION</div></header>
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h13l-4-4M19 15H6l4 4"/></svg></div>DELUXE CONVERT</div><div class="badge">PRIVATE · BROWSER-BASED CONVERSION</div><div id="deluxeAccount" class="deluxe-account"></div></header>
 
 <section class="hero"><div class="eyebrow">One tool. Many formats.</div><h1>Convert files <span>effortlessly.</span></h1><p>Images, PDFs, Word, spreadsheets, data, audio and video. Convert several files at once, right in your browser.</p></section>
 
@@ -106,6 +108,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 </div>
 
 <div id="list" aria-live="polite"></div>
+<div id="recentConv" class="recent-conv" hidden></div>
 
 <div class="actions" id="actions">
  <button class="btn main" id="convertAll">Convert all ↗</button>
@@ -135,6 +138,8 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  </div>
 </div>
 
+<!-- Sign in with Deluxe Main: your format choice and a list of recent conversions (names only, never the files) are saved to your Deluxe account. -->
+<script src="https://deluxe-drive.deluxelordd.workers.dev/main/deluxe.js" data-app="convert"></script>
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
@@ -660,6 +665,7 @@ async function run(list) {
     try {
       const r = await convert(it, prog);
       it.result = r; it.url = URL.createObjectURL(r.blob); it.state = 'done';
+      noteConversion(it);
     } catch (e) { it.state = 'error'; it.error = e.message || 'Conversion failed. Please try another file.'; }
     render();
   }
@@ -692,6 +698,7 @@ function applyTyped() {
   let v = $('typeIn').value.trim().toLowerCase().replace(/^\./, '');
   if (!v) return;
   v = ALIAS[v] || v;
+  if (window.Deluxe && Deluxe.user()) Deluxe.data.put('lastFormat', v).catch(() => {});
   items.forEach(it => {
     if (it.state === 'working') return;
     if (it.targets.includes(v)) { if (it.target !== v) { it.target = v; it.result = null; it.state = 'idle'; } it.note = ''; }
@@ -702,6 +709,45 @@ function applyTyped() {
 $('typeGo').onclick = applyTyped;
 $('typeIn').onchange = applyTyped;
 $('typeIn').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); applyTyped(); } };
+
+/* Deluxe account (Deluxe Main). Files never leave this device: only the file
+   names, formats and sizes of finished conversions are saved. */
+let recentConv = [];
+// Guests keep this list in this browser; signed in, it is kept in the Deluxe
+// account, and what a guest had is added the first time.
+const LOCAL_CONV = 'dc.history';
+const localConv = () => { try { const v = JSON.parse(localStorage.getItem(LOCAL_CONV) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+function drawRecentConv() {
+  const box = $('recentConv');
+  box.hidden = !recentConv.length;
+  if (!recentConv.length) return;
+  const ul = mk('ul');
+  recentConv.slice(0, 8).forEach(r => ul.appendChild(mk('li', '', r.name + ' → ' + r.to.toUpperCase() + ' · ' + new Date(r.at).toLocaleDateString())));
+  box.replaceChildren(mk('b', '', 'Your recent conversions'), ul);
+}
+function noteConversion(it) {
+  recentConv = [{ name: it.file.name, to: it.target, size: it.result.blob.size, at: Date.now() }, ...recentConv].slice(0, 30);
+  drawRecentConv();
+  if (window.Deluxe && Deluxe.user()) Deluxe.data.put('history', recentConv).catch(() => {});
+  else try { localStorage.setItem(LOCAL_CONV, JSON.stringify(recentConv)); } catch (e) {}
+}
+recentConv = localConv();
+drawRecentConv();
+if (window.Deluxe) {
+  Deluxe.button($('deluxeAccount'));
+  const load = user => {
+    if (!user) { recentConv = localConv(); drawRecentConv(); return; }
+    Deluxe.data.get('history').then(v => {
+      const mine = localConv();
+      recentConv = [...mine, ...(Array.isArray(v) ? v : [])].sort((a, b) => b.at - a.at).slice(0, 30);
+      drawRecentConv();
+      if (mine.length) Deluxe.data.put('history', recentConv).then(() => { try { localStorage.removeItem(LOCAL_CONV); } catch (e) {} }).catch(() => {});
+    }).catch(() => {});
+    Deluxe.data.get('lastFormat').then(v => { if (v && !$('typeIn').value) $('typeIn').placeholder = 'e.g. ' + v + ' (your last choice)'; }).catch(() => {});
+  };
+  Deluxe.ready.then(load);
+  Deluxe.onChange(load);
+}
 
 /* credits screen */
 function openCredits() { $('credits').classList.add('open'); document.body.style.overflow = 'hidden'; $('cclose').focus(); }
