@@ -139,7 +139,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 </div>
 
 <!-- Sign in with Deluxe Main: your format choice and a list of recent conversions (names only, never the files) are saved to your Deluxe account. -->
-<script src="https://deluxe-main.deluxelordd.workers.dev/deluxe.js" data-app="convert"></script>
+<script src="https://deluxe-drive.deluxelordd.workers.dev/main/deluxe.js" data-app="convert"></script>
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
@@ -713,6 +713,10 @@ $('typeIn').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); appl
 /* Deluxe account (Deluxe Main). Files never leave this device: only the file
    names, formats and sizes of finished conversions are saved. */
 let recentConv = [];
+// Guests keep this list in this browser; signed in, it is kept in the Deluxe
+// account, and what a guest had is added the first time.
+const LOCAL_CONV = 'dc.history';
+const localConv = () => { try { const v = JSON.parse(localStorage.getItem(LOCAL_CONV) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
 function drawRecentConv() {
   const box = $('recentConv');
   box.hidden = !recentConv.length;
@@ -722,16 +726,23 @@ function drawRecentConv() {
   box.replaceChildren(mk('b', '', 'Your recent conversions'), ul);
 }
 function noteConversion(it) {
-  if (!window.Deluxe || !Deluxe.user()) return;
   recentConv = [{ name: it.file.name, to: it.target, size: it.result.blob.size, at: Date.now() }, ...recentConv].slice(0, 30);
   drawRecentConv();
-  Deluxe.data.put('history', recentConv).catch(() => {});
+  if (window.Deluxe && Deluxe.user()) Deluxe.data.put('history', recentConv).catch(() => {});
+  else try { localStorage.setItem(LOCAL_CONV, JSON.stringify(recentConv)); } catch (e) {}
 }
+recentConv = localConv();
+drawRecentConv();
 if (window.Deluxe) {
   Deluxe.button($('deluxeAccount'));
   const load = user => {
-    if (!user) { recentConv = []; drawRecentConv(); return; }
-    Deluxe.data.get('history').then(v => { recentConv = Array.isArray(v) ? v : []; drawRecentConv(); }).catch(() => {});
+    if (!user) { recentConv = localConv(); drawRecentConv(); return; }
+    Deluxe.data.get('history').then(v => {
+      const mine = localConv();
+      recentConv = [...mine, ...(Array.isArray(v) ? v : [])].sort((a, b) => b.at - a.at).slice(0, 30);
+      drawRecentConv();
+      if (mine.length) Deluxe.data.put('history', recentConv).then(() => { try { localStorage.removeItem(LOCAL_CONV); } catch (e) {} }).catch(() => {});
+    }).catch(() => {});
     Deluxe.data.get('lastFormat').then(v => { if (v && !$('typeIn').value) $('typeIn').placeholder = 'e.g. ' + v + ' (your last choice)'; }).catch(() => {});
   };
   Deluxe.ready.then(load);

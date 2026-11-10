@@ -7,7 +7,7 @@ Typed output formats: after adding files, type a format (e.g. `pdf`, `mp3`) to a
 ## Deluxe account
 
 Tap **Sign in with Deluxe Main** (top right) to use your Deluxe account from
-[Deluxe Main](https://deluxe-main.deluxelordd.workers.dev). Files still never leave your device: only
+[Deluxe Main](https://deluxe-drive.deluxelordd.workers.dev/main). Files still never leave your device: only
 your last typed format and a list of recent conversions (file name, format, size, date) are saved to
 your account, under the `convert` website in Deluxe Main. The page loads `deluxe.js` from Deluxe Main;
 if it cannot load, the converter works exactly as before.
