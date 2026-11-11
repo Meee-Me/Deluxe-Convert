@@ -14,10 +14,11 @@ if it cannot load, the converter works exactly as before.
 
 ## With Deluxe Drive
 
-- In Deluxe Drive, a file's menu has **Convert with Deluxe Convert**: Convert opens with that file
-  already added (`?url=<share link>&name=<file name>`).
+- In Deluxe Drive, a file's menu has **Convert with Deluxe Convert** and **Save as…**: Convert opens with
+  that file already added (`?url=<share link>&name=<file name>&to=<format>`).
+- Signed in, **Add from Deluxe Drive** (under the drop area) browses your Drive and adds a file.
 - Signed in, every finished conversion has **Save to Drive**: the file goes into a **Deluxe Convert**
-  folder in your Deluxe Drive. Deluxe Main lets Convert only add new files there.
+  folder in your Deluxe Drive. Deluxe Main lets Convert open files and add new ones there, never change or delete anything.
 
 ## Supported conversions
 

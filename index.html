@@ -84,6 +84,18 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 }
 .deluxe-account:empty{display:none}.deluxe-account{margin-left:auto}
 .recent-conv{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;font-size:14px;color:#aebbd1}.recent-conv b{display:block;color:var(--text);margin-bottom:6px}.recent-conv li{margin:3px 0;overflow-wrap:anywhere}.recent-conv ul{margin:0;padding-left:18px}
+.fromdrive{display:flex;justify-content:center;margin-top:14px}
+.dpick{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:rgba(4,8,18,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.dpick .box{width:min(520px,100%);max-height:min(640px,calc(100vh - 32px));display:flex;flex-direction:column;background:#0f1729;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.dpick h2{margin:0 0 10px;font-size:19px}
+.dpick input{width:100%;box-sizing:border-box;background:#0b1322;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;outline:none;margin-bottom:10px}
+.dpick .crumbs{font-size:13px;color:#aebbd1;margin:0 0 8px;display:flex;flex-wrap:wrap;gap:4px}
+.dpick .crumbs button{background:none;border:0;color:var(--cyan);font:inherit;cursor:pointer;padding:0}
+.dpick .rows{overflow:auto;flex:1;display:grid;gap:4px}
+.dpick .rowb{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:10px 12px;border-radius:10px;border:1px solid transparent;background:rgba(255,255,255,.04);color:var(--text);font:inherit;cursor:pointer}
+.dpick .rowb:hover{border-color:var(--line);background:rgba(255,255,255,.08)}
+.dpick .rowb small{display:block;color:#aebbd1;font-size:12px}
+.dpick .foot{display:flex;justify-content:flex-end;margin-top:12px}
 </style>
 </head>
 <body>
@@ -98,6 +110,10 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  <strong>Drop your files here</strong><small>or <span class="browse">browse files</span> · select as many as you like</small>
  <div class="chips"><span class="chip">Images / HEIC / TIFF / PSD</span><span class="chip">PDF</span><span class="chip">Word / PowerPoint / ODT</span><span class="chip">Excel / CSV</span><span class="chip">JSON / YAML / XML</span><span class="chip">Text / HTML / MD</span><span class="chip">Audio</span><span class="chip">Video</span><span class="chip">Any file → ZIP</span></div>
  <input type="file" id="file" multiple hidden>
+</div>
+
+<div class="fromdrive" id="fromDriveRow" hidden>
+ <button class="btn" id="fromDrive" type="button">Add from Deluxe Drive</button>
 </div>
 
 <div class="typed" id="typed">
@@ -793,12 +809,85 @@ function note(text) {
   t.textContent = text; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 3500);
 }
 
+// "Add from Deluxe Drive": browse the drive's folders and files and add one.
+// Deluxe Main lets Convert read the file list and the files, and nothing more.
+async function pickFromDrive() {
+  if (!(window.Deluxe && Deluxe.user())) { Deluxe && Deluxe.signIn(); return; }
+  let nodes;
+  try {
+    nodes = (await Deluxe.data.list({ prefix: 'node:', app: 'drive' })).map(i => i.value).filter(n => n && n.id && !n.trashed);
+  } catch (e) { note(e.message || 'Could not open your Deluxe Drive.'); return; }
+  const byId = new Map(nodes.map(n => [n.id, n]));
+  let folder = null;
+  const wrap = mk('div', 'dpick'); wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true');
+  const box = mk('div', 'box');
+  const search = mk('input'); search.type = 'search'; search.placeholder = 'Search your Drive'; search.setAttribute('aria-label', 'Search your Drive');
+  const crumbs = mk('div', 'crumbs'); const rows = mk('div', 'rows');
+  const foot = mk('div', 'foot'); const cancel = mk('button', 'btn', 'Cancel'); cancel.type = 'button'; foot.appendChild(cancel);
+  box.append(mk('h2', '', 'Add from Deluxe Drive'), search, crumbs, rows, foot);
+  wrap.appendChild(box); document.body.appendChild(wrap);
+  const close = () => { wrap.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  cancel.onclick = close;
+  wrap.addEventListener('click', (e) => { if (e.target === wrap) close(); });
+  const draw = () => {
+    const q = search.value.trim().toLowerCase();
+    crumbs.replaceChildren(); rows.replaceChildren();
+    if (!q) {
+      const path = []; let c = folder;
+      while (c && byId.get(c) && path.length < 50) { path.unshift(byId.get(c)); c = byId.get(c).parentId || null; }
+      const link = (label, id) => { const b = mk('button', '', label); b.type = 'button'; b.onclick = () => { folder = id; draw(); }; return b; };
+      crumbs.appendChild(link('My Drive', null));
+      path.forEach(n => { crumbs.appendChild(mk('span', '', '/')); crumbs.appendChild(link(n.name, n.id)); });
+    }
+    let list = q ? nodes.filter(n => n.type === 'file' && String(n.name).toLowerCase().includes(q)) : nodes.filter(n => (n.parentId || null) === folder);
+    list.sort((a, b) => (a.type === 'folder') !== (b.type === 'folder') ? (a.type === 'folder' ? -1 : 1) : String(a.name).localeCompare(String(b.name)));
+    if (!list.length) rows.appendChild(mk('p', '', q ? 'No files match.' : 'This folder is empty.'));
+    list.slice(0, 300).forEach(n => {
+      const b = mk('button', 'rowb'); b.type = 'button';
+      const t = mk('div'); t.append(mk('span', '', (n.type === 'folder' ? '📁 ' : '📄 ') + n.name));
+      if (n.type !== 'folder') t.append(mk('small', '', fmtBytes(+n.size || 0)));
+      b.appendChild(t);
+      b.onclick = async () => {
+        if (n.type === 'folder') { folder = n.id; search.value = ''; draw(); return; }
+        b.disabled = true; note('Getting ' + n.name + '…');
+        try {
+          const r = await fetch(DRIVE_SERVER + '/api/db/blobs/' + encodeURIComponent(n.id), { headers: { Authorization: 'Bearer ' + Deluxe.token() } });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const blob = await r.blob();
+          addFiles([new File([blob], n.name, { type: n.mime || blob.type })]);
+          note('Added ' + n.name + '. Pick a format and convert.');
+          close();
+        } catch (e) { b.disabled = false; note('That file could not be opened.'); }
+      };
+      rows.appendChild(b);
+    });
+  };
+  search.oninput = draw;
+  draw();
+  search.focus();
+}
+$('fromDrive').onclick = pickFromDrive;
+if (window.Deluxe) {
+  const showFromDrive = (u) => { $('fromDriveRow').hidden = !u; };
+  Deluxe.ready.then(showFromDrive); Deluxe.onChange(showFromDrive);
+}
+
+// A format chosen in Deluxe Drive ("Save as…") is applied to the file that arrives.
+function applyFormat(fmt) {
+  if (!fmt) return;
+  $('typeIn').value = fmt;
+  applyTyped();
+}
+
 // Opened from Deluxe Drive ("Convert with Deluxe Convert"): ?url=<share link>&name=<file name>.
 (async () => {
   const q = new URLSearchParams(location.search);
   const src = q.get('url');
   if (!src) return;
-  history.replaceState(null, '', location.pathname);
+  // The link stays in the address, so signing in (which reloads the page)
+  // brings the same file back.
   let link;
   try { link = new URL(src); } catch (e) { return; }
   if (link.protocol !== 'https:' && link.hostname !== 'localhost') return;
@@ -809,7 +898,9 @@ function note(text) {
     const blob = await r.blob();
     const name = (q.get('name') || link.pathname.split('/').pop() || 'file').slice(0, 200);
     addFiles([new File([blob], name, { type: blob.type })]);
-    note('Added ' + name + '. Pick a format and convert.');
+    const fmt = (q.get('to') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10);
+    applyFormat(fmt);
+    note('Added ' + name + (fmt ? '. Tap Convert all for ' + fmt.toUpperCase() + '.' : '. Pick a format and convert.'));
   } catch (e) {
     note('That file could not be fetched from Deluxe Drive.');
   }
