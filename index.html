@@ -639,6 +639,13 @@ function rowEl(it) {
   ctl.appendChild(sel);
   if (it.state === 'done') {
     const a = mk('a', 'btn dl', 'Download'); a.href = it.url; a.download = it.result.name; ctl.appendChild(a);
+    if (window.Deluxe && Deluxe.user()) {
+      const sv = mk('button', 'btn', it.savedToDrive ? 'Saved ✓' : 'Save to Drive');
+      sv.title = 'Save to the Deluxe Convert folder in your Deluxe Drive';
+      sv.disabled = busy || !!it.savedToDrive || !!it.saving;
+      sv.onclick = () => saveToDrive(it);
+      ctl.appendChild(sv);
+    }
   } else {
     const b = mk('button', 'btn', 'Convert'); b.disabled = busy || !it.target; b.onclick = () => run([it]); ctl.appendChild(b);
   }
@@ -736,6 +743,7 @@ drawRecentConv();
 if (window.Deluxe) {
   Deluxe.button($('deluxeAccount'));
   const load = user => {
+    render(); // shows or hides "Save to Drive"
     if (!user) { recentConv = localConv(); drawRecentConv(); return; }
     Deluxe.data.get('history').then(v => {
       const mine = localConv();
@@ -748,6 +756,64 @@ if (window.Deluxe) {
   Deluxe.ready.then(load);
   Deluxe.onChange(load);
 }
+
+/* ---------- Deluxe Drive, through the Deluxe account ---------- */
+// Save a converted file into a "Deluxe Convert" folder in Deluxe Drive. Deluxe
+// Main lets this site add new files there, and nothing else.
+const DRIVE_SERVER = 'https://deluxe-drive.deluxelordd.workers.dev';
+const DRIVE_FOLDER = 'f_deluxe_convert';
+async function saveToDrive(it) {
+  const user = window.Deluxe && Deluxe.user();
+  if (!user) { Deluxe && Deluxe.signIn(); return; }
+  it.saving = true; render();
+  try {
+    const id = 'n_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    const blob = it.result.blob, name = it.result.name, now = Date.now();
+    const up = await fetch(DRIVE_SERVER + '/api/db/blobs/' + encodeURIComponent(id), {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + Deluxe.token(), 'Content-Type': blob.type || 'application/octet-stream', 'X-Deluxe-Name': encodeURIComponent(name) },
+      body: blob,
+    });
+    if (!up.ok) { const d = await up.json().catch(() => ({})); throw new Error(d.error || 'Deluxe Drive did not take the file.'); }
+    // The folder is made the first time; after that it is already there.
+    await Deluxe.data.put('node:' + DRIVE_FOLDER, { id: DRIVE_FOLDER, ownerId: user.id, parentId: null, type: 'folder', name: 'Deluxe Convert', starred: false, trashed: false, trashedAt: null, createdAt: now, updatedAt: now }, { app: 'drive' })
+      .catch((e) => { if (e.status !== 409) throw e; });
+    await Deluxe.data.put('node:' + id, { id, ownerId: user.id, parentId: DRIVE_FOLDER, type: 'file', name, mime: blob.type || '', size: blob.size, starred: false, trashed: false, trashedAt: null, createdAt: now, updatedAt: now }, { app: 'drive' });
+    it.savedToDrive = true;
+    note('Saved to your Deluxe Drive, in the Deluxe Convert folder');
+  } catch (e) {
+    note(e.message || 'Could not save to Deluxe Drive');
+  } finally {
+    it.saving = false; render();
+  }
+}
+function note(text) {
+  let t = document.getElementById('dc-note');
+  if (!t) { t = mk('div'); t.id = 'dc-note'; t.setAttribute('role', 'status'); t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;padding:12px 16px;border-radius:12px;background:#111a2b;color:#fff;border:1px solid rgba(255,255,255,.15);font-weight:600;max-width:calc(100vw - 32px)'; document.body.appendChild(t); }
+  t.textContent = text; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 3500);
+}
+
+// Opened from Deluxe Drive ("Convert with Deluxe Convert"): ?url=<share link>&name=<file name>.
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const src = q.get('url');
+  if (!src) return;
+  history.replaceState(null, '', location.pathname);
+  let link;
+  try { link = new URL(src); } catch (e) { return; }
+  if (link.protocol !== 'https:' && link.hostname !== 'localhost') return;
+  note('Getting your file from Deluxe Drive…');
+  try {
+    const r = await fetch(link.toString());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const blob = await r.blob();
+    const name = (q.get('name') || link.pathname.split('/').pop() || 'file').slice(0, 200);
+    addFiles([new File([blob], name, { type: blob.type })]);
+    note('Added ' + name + '. Pick a format and convert.');
+  } catch (e) {
+    note('That file could not be fetched from Deluxe Drive.');
+  }
+})();
 
 /* credits screen */
 function openCredits() { $('credits').classList.add('open'); document.body.style.overflow = 'hidden'; $('cclose').focus(); }

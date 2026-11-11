@@ -12,6 +12,13 @@ your last typed format and a list of recent conversions (file name, format, size
 your account, under the `convert` website in Deluxe Main. The page loads `deluxe.js` from Deluxe Main;
 if it cannot load, the converter works exactly as before.
 
+## With Deluxe Drive
+
+- In Deluxe Drive, a file's menu has **Convert with Deluxe Convert**: Convert opens with that file
+  already added (`?url=<share link>&name=<file name>`).
+- Signed in, every finished conversion has **Save to Drive**: the file goes into a **Deluxe Convert**
+  folder in your Deluxe Drive. Deluxe Main lets Convert only add new files there.
+
 ## Supported conversions
 
 | Input | Output |
