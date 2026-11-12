@@ -96,6 +96,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 .dpick .rowb:hover{border-color:var(--line);background:rgba(255,255,255,.08)}
 .dpick .rowb small{display:block;color:#aebbd1;font-size:12px}
 .dpick .foot{display:flex;justify-content:flex-end;margin-top:12px}
+.btn.drive{border-color:rgba(124,92,255,.55)}
 </style>
 </head>
 <body>
@@ -112,7 +113,7 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
  <input type="file" id="file" multiple hidden>
 </div>
 
-<div class="fromdrive" id="fromDriveRow" hidden>
+<div class="fromdrive" id="fromDriveRow">
  <button class="btn" id="fromDrive" type="button">Add from Deluxe Drive</button>
 </div>
 
@@ -129,9 +130,10 @@ select{background:#0b1322;color:var(--text);border:1px solid var(--line);border-
 <div class="actions" id="actions">
  <button class="btn main" id="convertAll">Convert all ↗</button>
  <button class="btn ghost" id="zipAll" disabled>Download all (ZIP)</button>
+ <button class="btn ghost drive" id="saveAllDrive" disabled>Save all to Deluxe Drive</button>
  <button class="btn ghost" id="clear">Clear</button>
 </div>
-<p class="note">Everything runs on your device. Files are never uploaded. Audio and video use a larger engine that loads the first time you need it.</p>
+<p class="note">Everything runs on your device. Files are only uploaded if you choose Save to Deluxe Drive. Audio and video use a larger engine that loads the first time you need it.</p>
 </main>
 
 <section class="features">
@@ -630,6 +632,7 @@ function render() {
   $('actions').style.display = items.length ? 'flex' : 'none';
   $('typed').style.display = items.length ? 'flex' : 'none';
   $('zipAll').disabled = !items.some(i => i.result);
+  $('saveAllDrive').disabled = busy || !items.some(i => i.result && !i.savedToDrive && !i.saving);
   $('convertAll').disabled = busy || !items.some(i => i.target && !i.result);
   $('list').replaceChildren(...items.map(rowEl));
 }
@@ -655,11 +658,12 @@ function rowEl(it) {
   ctl.appendChild(sel);
   if (it.state === 'done') {
     const a = mk('a', 'btn dl', 'Download'); a.href = it.url; a.download = it.result.name; ctl.appendChild(a);
-    if (window.Deluxe && Deluxe.user()) {
-      const sv = mk('button', 'btn', it.savedToDrive ? 'Saved ✓' : 'Save to Drive');
-      sv.title = 'Save to the Deluxe Convert folder in your Deluxe Drive';
+    if (window.Deluxe) {
+      const signedIn = !!Deluxe.user();
+      const sv = mk('button', 'btn drive', it.savedToDrive ? 'Saved in Drive ✓' : it.saving ? 'Saving…' : 'Save to Deluxe Drive');
+      sv.title = signedIn ? 'Save to the Deluxe Convert folder in your Deluxe Drive' : 'Sign in with Deluxe Main to save to your Deluxe Drive';
       sv.disabled = busy || !!it.savedToDrive || !!it.saving;
-      sv.onclick = () => saveToDrive(it);
+      sv.onclick = () => (signedIn ? saveToDrive(it) : askToSignInForDrive());
       ctl.appendChild(sv);
     }
   } else {
@@ -695,6 +699,10 @@ async function run(list) {
   busy = false; render();
 }
 $('convertAll').onclick = () => run(items.filter(i => i.target && !i.result));
+$('saveAllDrive').onclick = async () => {
+  if (!(window.Deluxe && Deluxe.user())) { askToSignInForDrive(); return; }
+  for (const it of items.filter(i => i.result && !i.savedToDrive)) await saveToDrive(it);
+};
 $('zipAll').onclick = async () => {
   try {
     await lib('jszip'); const z = new JSZip(), used = {};
@@ -803,6 +811,13 @@ async function saveToDrive(it) {
     it.saving = false; render();
   }
 }
+// Signing in reloads the page, and converted files only live in this page, so
+// say so before leaving.
+function askToSignInForDrive() {
+  const done = items.filter(i => i.result).length;
+  const ok = !done || confirm('Saving to Deluxe Drive needs your Deluxe account. Signing in reloads this page, so download or convert your files again afterwards. Sign in now?');
+  if (ok) Deluxe.signIn();
+}
 function note(text) {
   let t = document.getElementById('dc-note');
   if (!t) { t = mk('div'); t.id = 'dc-note'; t.setAttribute('role', 'status'); t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;padding:12px 16px;border-radius:12px;background:#111a2b;color:#fff;border:1px solid rgba(255,255,255,.15);font-weight:600;max-width:calc(100vw - 32px)'; document.body.appendChild(t); }
@@ -869,10 +884,9 @@ async function pickFromDrive() {
   search.focus();
 }
 $('fromDrive').onclick = pickFromDrive;
-if (window.Deluxe) {
-  const showFromDrive = (u) => { $('fromDriveRow').hidden = !u; };
-  Deluxe.ready.then(showFromDrive); Deluxe.onChange(showFromDrive);
-}
+// Shown to everyone; signed out, it leads to signing in first.
+if (!window.Deluxe) $('fromDriveRow').hidden = true;
+$('fromDriveRow').style.display = window.Deluxe ? '' : 'none';
 
 // A format chosen in Deluxe Drive ("Save as…") is applied to the file that arrives.
 function applyFormat(fmt) {
